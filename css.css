@@ -9,27 +9,27 @@ body {
 }
 
 header {
-  background: linear-gradient(135deg, #003366, #005a9e);
+  background: linear-gradient(270deg, #5236ab 0%, #e41937 100%);
   color: white;
-  padding: 60px 0;
+  padding: 80px 0;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 header h1 {
   margin: 0;
-  font-size: 2.8em;
+  font-size: 3em;
   font-weight: 700;
 }
 
 header p {
   margin: 10px 0 0;
-  font-size: 1.3em;
+  font-size: 1.4em;
   font-weight: 300;
 }
 
 nav {
-  background-color: #005a9e;
+  background: linear-gradient(270deg, #5236ab 0%, #e41937 100%);
   padding: 15px 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -56,7 +56,7 @@ nav ul li a {
 }
 
 nav ul li a:hover {
-  color: #ffd700;
+  color: #ffd700; /* Gold color for hover effect */
 }
 
 section {
@@ -66,7 +66,7 @@ section {
 }
 
 section h2 {
-  color: #003366;
+  color: #5236ab; /* Gradient start color for headings */
   font-size: 2.2em;
   margin-bottom: 20px;
   font-weight: 600;
@@ -94,7 +94,7 @@ section p, section ul {
 }
 
 .experience-item h3, .project-item h3 {
-  color: #003366;
+  color: #5236ab; /* Gradient start color for subheadings */
   font-size: 1.5em;
   margin-bottom: 10px;
   font-weight: 600;
@@ -114,7 +114,7 @@ section p, section ul {
 }
 
 footer {
-  background: linear-gradient(135deg, #003366, #005a9e);
+  background: linear-gradient(270deg, #5236ab 0%, #e41937 100%);
   color: white;
   text-align: center;
   padding: 20px 0;

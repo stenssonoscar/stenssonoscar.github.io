@@ -9,7 +9,7 @@ body {
 }
 
 header {
-  background-color: #003366; /* CGI Blue */
+  background-color: #003366; /* CGI Dark Blue */
   color: white;
   padding: 40px 0;
   text-align: center;
@@ -26,7 +26,7 @@ header p {
 }
 
 nav {
-  background-color: #005a9e; /* Darker CGI Blue */
+  background-color: #005a9e; /* CGI Medium Blue */
   padding: 10px 0;
 }
 
@@ -59,7 +59,7 @@ section {
 }
 
 section h2 {
-  color: #003366; /* CGI Blue */
+  color: #003366; /* CGI Dark Blue */
   font-size: 2em;
   margin-bottom: 10px;
 }
@@ -76,7 +76,7 @@ section p, section ul {
 }
 
 footer {
-  background-color: #003366; /* CGI Blue */
+  background-color: #003366; /* CGI Dark Blue */
   color: white;
   text-align: center;
   padding: 10px 0;

@@ -1,33 +1,37 @@
 /* General Styles */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f4f4f4;
+  background-color: #f8f9fa;
   color: #333;
   line-height: 1.6;
 }
 
 header {
-  background-color: #003366; /* CGI Dark Blue */
+  background: linear-gradient(135deg, #003366, #005a9e); /* Gradient for modern look */
   color: white;
-  padding: 40px 0;
+  padding: 60px 0;
   text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 header h1 {
   margin: 0;
-  font-size: 2.5em;
+  font-size: 2.8em;
+  font-weight: 700;
 }
 
 header p {
   margin: 10px 0 0;
-  font-size: 1.2em;
+  font-size: 1.3em;
+  font-weight: 300;
 }
 
 nav {
-  background-color: #005a9e; /* CGI Medium Blue */
-  padding: 10px 0;
+  background-color: #005a9e;
+  padding: 15px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 nav ul {
@@ -36,53 +40,117 @@ nav ul {
   padding: 0;
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 nav ul li {
-  margin: 0 15px;
+  margin: 0 20px;
 }
 
 nav ul li a {
   color: white;
   text-decoration: none;
   font-size: 1.1em;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
 nav ul li a:hover {
-  text-decoration: underline;
+  color: #ffd700; /* Gold color for hover effect */
 }
 
 section {
-  padding: 20px;
-  max-width: 800px;
+  padding: 40px 20px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
 section h2 {
-  color: #003366; /* CGI Dark Blue */
-  font-size: 2em;
-  margin-bottom: 10px;
+  color: #003366;
+  font-size: 2.2em;
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-align: center;
 }
 
 section p, section ul {
-  line-height: 1.6;
+  line-height: 1.8;
+  font-size: 1.1em;
+  color: #555;
 }
 
 .experience-item, .project-item {
-  background-color: #e1e1e1;
+  background-color: white;
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.experience-item:hover, .project-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.experience-item h3, .project-item h3 {
+  color: #003366;
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.experience-item p, .project-item p {
+  margin: 5px 0;
+  color: #777;
+}
+
+.experience-item ul, .project-item ul {
+  padding-left: 20px;
+}
+
+.experience-item ul li, .project-item ul li {
   margin: 10px 0;
-  padding: 15px;
-  border-radius: 5px;
 }
 
 footer {
-  background-color: #003366; /* CGI Dark Blue */
+  background: linear-gradient(135deg, #003366, #005a9e);
   color: white;
   text-align: center;
-  padding: 10px 0;
-  margin-top: 20px;
+  padding: 20px 0;
+  margin-top: 40px;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
 }
 
 footer p {
   margin: 0;
+  font-size: 1em;
+  font-weight: 300;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  header h1 {
+    font-size: 2.2em;
+  }
+
+  header p {
+    font-size: 1.1em;
+  }
+
+  nav ul li {
+    margin: 10px 15px;
+  }
+
+  section {
+    padding: 20px 15px;
+  }
+
+  section h2 {
+    font-size: 1.8em;
+  }
+
+  .experience-item, .project-item {
+    padding: 15px;
+  }
 }

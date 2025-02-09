@@ -123,6 +123,117 @@ section p, section ul {
   margin: 10px 0;
 }
 
+/* Skills Section */
+#skills {
+  background-color: #f8f9fa;
+  padding: 60px 20px;
+}
+
+#skills h2 {
+  color: #5236ab;
+  font-size: 2.2em;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.skill-item {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.skill-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.skill-item i {
+  font-size: 2em;
+  color: #5236ab;
+  margin-bottom: 10px;
+}
+
+.skill-item h3 {
+  color: #5236ab;
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.skill-item p {
+  color: #777;
+  font-size: 0.9em;
+}
+
+/* Contact Section */
+#contact {
+  background-color: #ffffff;
+  padding: 60px 20px;
+}
+
+#contact h2 {
+  color: #5236ab;
+  font-size: 2.2em;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.contact-info {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.contact-item {
+  text-align: center;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contact-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.contact-item i {
+  font-size: 2em;
+  color: #5236ab;
+  margin-bottom: 10px;
+}
+
+.contact-item h3 {
+  color: #5236ab;
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.contact-item a {
+  color: #e41937;
+  text-decoration: none;
+  font-size: 1em;
+  transition: color 0.3s ease;
+}
+
+.contact-item a:hover {
+  color: #5236ab;
+}
+
 footer {
   background: linear-gradient(270deg, #5236ab 0%, #e41937 100%);
   color: white;

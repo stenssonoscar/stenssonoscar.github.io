@@ -1,29 +1,41 @@
+/* Color Variables */
+:root {
+  --primary-gradient-start: #5236ab;
+  --primary-gradient-end: #e41937;
+  --text-color: #333;
+  --background-color: #f8f9fa;
+  --card-background: #fff;
+  --hover-color: #ffd700;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode {
+  --primary-gradient-start: #2a204d;
+  --primary-gradient-end: #872530;
+  --text-color: #f1f1f1;
+  --background-color: #1c1c1c;
+  --card-background: #2c2c2c;
+  --hover-color: #ffae42;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
 /* General Styles */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f8f9fa;
-  color: #333;
+  background-color: var(--background-color);
+  color: var(--text-color);
   line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 header {
-  background: linear-gradient(270deg, #5236ab 0%, #e41937 100%);
+  background: linear-gradient(270deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
   color: white;
   padding: 80px 0;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Profile Picture Styles */
-.profile-picture {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%; /* Makes the image circular */
-  border: 4px solid white; /* Adds a white border */
-  margin-bottom: 20px; /* Adds space below the picture */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
+  box-shadow: 0 4px 6px var(--shadow-color);
 }
 
 header h1 {
@@ -38,10 +50,11 @@ header p {
   font-weight: 300;
 }
 
+/* Navigation Styles */
 nav {
-  background: linear-gradient(270deg, #5236ab 0%, #e41937 100%);
+  background: linear-gradient(270deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
   padding: 15px 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
 nav ul {
@@ -57,26 +70,34 @@ nav ul li {
   margin: 0 20px;
 }
 
-nav ul li a {
+nav ul li a, #theme-toggle {
   color: white;
   text-decoration: none;
   font-size: 1.1em;
   font-weight: 500;
   transition: color 0.3s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
-nav ul li a:hover {
-  color: #ffd700; /* Gold color for hover effect */
+nav ul li a:hover, #theme-toggle:hover {
+  color: var(--hover-color);
 }
 
+/* Section Styles */
 section {
   padding: 40px 20px;
   max-width: 1000px;
   margin: 0 auto;
+  background-color: var(--card-background);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 section h2 {
-  color: #5236ab; /* Gradient start color for headings */
+  color: var(--primary-gradient-start);
   font-size: 2.2em;
   margin-bottom: 20px;
   font-weight: 600;
@@ -86,25 +107,26 @@ section h2 {
 section p, section ul {
   line-height: 1.8;
   font-size: 1.1em;
-  color: #555;
+  color: var(--text-color);
 }
 
+/* Experience and Project Items */
 .experience-item, .project-item {
-  background-color: white;
+  background-color: var(--card-background);
   margin: 20px 0;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .experience-item:hover, .project-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px var(--shadow-color);
 }
 
 .experience-item h3, .project-item h3 {
-  color: #5236ab; /* Gradient start color for subheadings */
+  color: var(--primary-gradient-start);
   font-size: 1.5em;
   margin-bottom: 10px;
   font-weight: 600;
@@ -125,12 +147,12 @@ section p, section ul {
 
 /* Skills Section */
 #skills {
-  background-color: #f8f9fa;
+  background-color: var(--background-color);
   padding: 60px 20px;
 }
 
 #skills h2 {
-  color: #5236ab;
+  color: var(--primary-gradient-start);
   font-size: 2.2em;
   margin-bottom: 40px;
   text-align: center;
@@ -145,27 +167,27 @@ section p, section ul {
 }
 
 .skill-item {
-  background-color: white;
+  background-color: var(--card-background);
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px var(--shadow-color);
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .skill-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px var(--shadow-color);
 }
 
 .skill-item i {
   font-size: 2em;
-  color: #5236ab;
+  color: var(--primary-gradient-start);
   margin-bottom: 10px;
 }
 
 .skill-item h3 {
-  color: #5236ab;
+  color: var(--primary-gradient-start);
   font-size: 1.2em;
   margin-bottom: 10px;
 }
@@ -177,12 +199,12 @@ section p, section ul {
 
 /* Contact Section */
 #contact {
-  background-color: #ffffff;
+  background-color: var(--card-background);
   padding: 60px 20px;
 }
 
 #contact h2 {
-  color: #5236ab;
+  color: var(--primary-gradient-start);
   font-size: 2.2em;
   margin-bottom: 40px;
   text-align: center;
@@ -199,48 +221,49 @@ section p, section ul {
 
 .contact-item {
   text-align: center;
-  background-color: #f8f9fa;
+  background-color: var(--background-color);
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px var(--shadow-color);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .contact-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px var(--shadow-color);
 }
 
 .contact-item i {
   font-size: 2em;
-  color: #5236ab;
+  color: var(--primary-gradient-start);
   margin-bottom: 10px;
 }
 
 .contact-item h3 {
-  color: #5236ab;
+  color: var(--primary-gradient-start);
   font-size: 1.2em;
   margin-bottom: 10px;
 }
 
 .contact-item a {
-  color: #e41937;
+  color: var(--primary-gradient-end);
   text-decoration: none;
   font-size: 1em;
   transition: color 0.3s ease;
 }
 
 .contact-item a:hover {
-  color: #5236ab;
+  color: var(--primary-gradient-start);
 }
 
+/* Footer */
 footer {
-  background: linear-gradient(270deg, #5236ab 0%, #e41937 100%);
+  background: linear-gradient(270deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
   color: white;
   text-align: center;
   padding: 20px 0;
   margin-top: 40px;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -2px 4px var(--shadow-color);
 }
 
 footer p {

@@ -16,6 +16,16 @@ header {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Profile Picture Styles */
+.profile-picture {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%; /* Makes the image circular */
+  border: 4px solid white; /* Adds a white border */
+  margin-bottom: 20px; /* Adds space below the picture */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
+}
+
 header h1 {
   margin: 0;
   font-size: 3em;

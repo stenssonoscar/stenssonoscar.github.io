@@ -69,6 +69,37 @@ body {
   color: #444;
 }
 
+/* Contact Section */
+.contact-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 15px;
+  padding: 2rem;
+  margin-top: 40px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+}
+.contact-image img {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 3px solid #0073e6;
+}
+.contact-info h3 {
+  font-size: 1.5rem;
+  color: #0073e6;
+}
+.social-icons a {
+  color: #0073e6;
+  font-size: 1.3rem;
+  transition: color 0.3s ease, transform 0.3s;
+}
+.social-icons a:hover {
+  color: #005bb5;
+  transform: scale(1.1);
+}
+
 /* Footer */
 .site-footer {
   text-align: center;

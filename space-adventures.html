@@ -151,10 +151,10 @@
     // Obstacle settings
     const obstacleWidth = 80;
     const baseObstacleGap = 200;
-    const baseObstacleSpeed = 2.0;
+    const baseObstacleSpeed = 6.0;
     let obstacles = [];
     let obstacleInterval = 2100; // milliseconds between obstacles
-    let lastObstacleTime = Date.now();
+    lastObstacleTime = Date.now() - obstacleInterval + 100; // Spawn sooner
     
     // Dynamic difficulty functions
     function getDynamicObstacleSpeed() {
@@ -400,14 +400,16 @@
       menuOverlay.style.display = "none";
     }
     
-    function resetGame() {
-      ship.y = canvas.height / 2;
-      ship.velocity = 0;
-      obstacles = [];
-      score = 0;
-      lastObstacleTime = Date.now();
-      gameState = "playing";
-    }
+  function resetGame() {
+  ship.y = canvas.height / 2;
+  ship.velocity = 0;
+  obstacles = [];
+  score = 0;
+  lastObstacleTime = Date.now();
+  gameState = "playing";
+  obstacles.push(createObstacle(getDynamicObstacleGap()));
+  }
+
     
     // Audio effects (update file paths as needed)
     const jumpSound = new Audio("jump.mp3");

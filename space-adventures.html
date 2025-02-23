@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Space Adventures</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #111;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    /* Container that frames the game */
+    #gameContainer {
+      position: relative;
+      width: 90vw;
+      height: 90vh;
+      border: 15px solid #fff;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      background: #000;
+    }
+    /* Fullscreen canvas inside the container */
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    /* Enhanced scoreboard styling */
+    #scoreboard {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 28px;
+      color: #fff;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+    }
+    /* Overlay menu styling */
+    #menuOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      color: #fff;
+    }
+    #menuContent {
+      text-align: center;
+      max-width: 400px;
+      padding: 30px;
+      border: 2px solid #fff;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #222, #444);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+    }
+    #menuContent h1 {
+      margin-top: 0;
+      font-size: 36px;
+    }
+    #menuContent input[type="text"] {
+      padding: 10px;
+      width: 80%;
+      margin: 10px 0;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+    }
+    #menuContent button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background: #008cff;
+      color: #fff;
+      transition: background 0.3s;
+    }
+    #menuContent button:hover {
+      background: #005fa3;
+    }
+    #leaderboard {
+      text-align: left;
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      border-top: 1px solid #fff;
+      padding-top: 10px;
+    }
+    #leaderboard h2 {
+      margin: 10px 0;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Game container with a fancy frame -->
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    <div id="scoreboard">Score: 0</div>
+  </div>
+  <div id="menuOverlay">
+    <div id="menuContent"></div>
+  </div>
+  <script>
+    // Set up canvas inside the container
+    const canvas = document.getElementById("gameCanvas");
+    const gameContainer = document.getElementById("gameContainer");
+    function setCanvasSize() {
+      canvas.width = gameContainer.clientWidth;
+      canvas.height = gameContainer.clientHeight;
+    }
+    setCanvasSize();
+    window.addEventListener("resize", () => {
+      setCanvasSize();
+      initStars(); // Reinitialize stars on resize
+    });
+    
+    const ctx = canvas.getContext("2d");
+    
+    // Game state variables
+    let gameState = "start"; // "start", "playing", "gameover"
+    let score = 0;
+    let currentPlayer = "";
+    
+    // Spaceship settings
+    const ship = {
+      x: 50,
+      y: 0, // Will be set on resetGame()
+      width: 40,
+      height: 40,
+      velocity: 0,
+      gravity: 0.5,
+      jumpStrength: -8
+    };
+    
+    // Obstacle settings
+    const obstacleWidth = 80;
+    const baseObstacleGap = 200;
+    const baseObstacleSpeed = 2.0;
+    let obstacles = [];
+    let obstacleInterval = 2100; // milliseconds between obstacles
+    let lastObstacleTime = Date.now();
+    
+    // Dynamic difficulty functions
+    function getDynamicObstacleSpeed() {
+      return Math.min(3.0, baseObstacleSpeed + score * 0.1);
+    }
+    function getDynamicObstacleGap() {
+      return Math.max(100, baseObstacleGap - score * 2);
+    }
+    
+    // --- Space Background ---
+    // Create a star field
+    let stars = [];
+    function initStars() {
+      stars = [];
+      for (let i = 0; i < 150; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 2 + 0.5,
+          speed: Math.random() * 0.5 + 0.1
+        });
+      }
+    }
+    initStars();
+    
+    function updateStars() {
+      stars.forEach(star => {
+        star.x -= star.speed;
+        if (star.x < 0) {
+          star.x = canvas.width;
+          star.y = Math.random() * canvas.height;
+        }
+      });
+    }
+    
+    function drawStars() {
+      ctx.fillStyle = "white";
+      stars.forEach(star => {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+    
+    function drawSpaceBackground() {
+      // Create a vertical gradient background (deep navy to black)
+      let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, "#001");
+      gradient.addColorStop(1, "#000");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      updateStars();
+      drawStars();
+    }
+    
+    // --- End Space Background ---
+    
+    // Draw the spaceship emoji rotated so it faces right (3 o'clock)
+    function drawShip() {
+      ctx.save();
+      // Move to the center of the ship
+      ctx.translate(ship.x + ship.width / 2, ship.y + ship.height / 2);
+      // Rotate 90° clockwise
+      ctx.rotate(Math.PI / 4);
+      ctx.font = "40px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("🚀", 0, 0);
+      ctx.restore();
+    }
+    
+    // Create obstacles with a random gap position
+    function createObstacle(dynamicGap) {
+      const gapY = Math.floor(Math.random() * (canvas.height - dynamicGap - 100)) + 50;
+      const topObs = {
+        x: canvas.width,
+        y: 0,
+        width: obstacleWidth,
+        height: gapY
+      };
+      const bottomObs = {
+        x: canvas.width,
+        y: gapY + dynamicGap,
+        width: obstacleWidth,
+        height: canvas.height - (gapY + dynamicGap)
+      };
+      return { topObs, bottomObs, scored: false };
+    }
+    
+    // Update obstacles only if game is playing
+    function updateObstacles() {
+      if (gameState === "playing") {
+        const currentSpeed = getDynamicObstacleSpeed();
+        obstacles.forEach(obsPair => {
+          obsPair.topObs.x -= currentSpeed;
+          obsPair.bottomObs.x -= currentSpeed;
+        });
+        obstacles = obstacles.filter(obsPair => obsPair.topObs.x + obstacleWidth > 0);
+        if (Date.now() - lastObstacleTime > obstacleInterval) {
+          obstacles.push(createObstacle(getDynamicObstacleGap()));
+          lastObstacleTime = Date.now();
+        }
+      }
+    }
+    
+    // Draw obstacles with a purple gradient for a sci-fi look
+    function drawObstacles() {
+      obstacles.forEach(obsPair => {
+        const gradTop = ctx.createLinearGradient(obsPair.topObs.x, 0, obsPair.topObs.x + obstacleWidth, 0);
+        gradTop.addColorStop(0, "#8a2be2");
+        gradTop.addColorStop(1, "#da70d6");
+        ctx.fillStyle = gradTop;
+        ctx.fillRect(obsPair.topObs.x, obsPair.topObs.y, obsPair.topObs.width, obsPair.topObs.height);
+        
+        const gradBottom = ctx.createLinearGradient(obsPair.bottomObs.x, 0, obsPair.bottomObs.x + obstacleWidth, 0);
+        gradBottom.addColorStop(0, "#8a2be2");
+        gradBottom.addColorStop(1, "#da70d6");
+        ctx.fillStyle = gradBottom;
+        ctx.fillRect(obsPair.bottomObs.x, obsPair.bottomObs.y, obsPair.bottomObs.width, obsPair.bottomObs.height);
+      });
+    }
+    
+    // Update spaceship position only when playing
+    function updateShip() {
+      if (gameState === "playing") {
+        ship.velocity += ship.gravity;
+        ship.y += ship.velocity;
+      }
+    }
+    
+    // Collision detection
+    function checkCollision() {
+      if (ship.y < 0 || ship.y + ship.height > canvas.height) return true;
+      for (let obsPair of obstacles) {
+        if (
+          ship.x < obsPair.topObs.x + obsPair.topObs.width &&
+          ship.x + ship.width > obsPair.topObs.x &&
+          ship.y < obsPair.topObs.y + obsPair.topObs.height
+        ) return true;
+        if (
+          ship.x < obsPair.bottomObs.x + obsPair.bottomObs.width &&
+          ship.x + ship.width > obsPair.bottomObs.x &&
+          ship.y + ship.height > obsPair.bottomObs.y
+        ) return true;
+      }
+      return false;
+    }
+    
+    // Update score only when playing
+    function updateScore() {
+      if (gameState === "playing") {
+        obstacles.forEach(obsPair => {
+          if (!obsPair.scored && obsPair.topObs.x + obstacleWidth < ship.x) {
+            score++;
+            obsPair.scored = true;
+          }
+        });
+      }
+    }
+    
+    // Scoreboard update
+    const scoreboardDiv = document.getElementById("scoreboard");
+    function updateScoreboard() {
+      scoreboardDiv.textContent = "Score: " + score;
+    }
+    
+    // LocalStorage: Leaderboard management functions
+    function getPlayers() {
+      const players = localStorage.getItem("players");
+      return players ? JSON.parse(players) : [];
+    }
+    function savePlayers(players) {
+      localStorage.setItem("players", JSON.stringify(players));
+    }
+    function updatePlayerScore(playerName, newScore) {
+      let players = getPlayers();
+      let player = players.find(p => p.name === playerName);
+      if (!player) {
+        player = { name: playerName, score: newScore };
+        players.push(player);
+      } else {
+        if (newScore > player.score) {
+          player.score = newScore;
+        }
+      }
+      players.sort((a, b) => b.score - a.score);
+      savePlayers(players);
+    }
+    function getLeaderboardHTML() {
+      let players = getPlayers();
+      let html = "<h2>Top Players</h2><ol>";
+      players.forEach(p => {
+        html += `<li>${p.name}: ${p.score}</li>`;
+      });
+      html += "</ol>";
+      return html;
+    }
+    
+    // Menu overlay management
+    const menuOverlay = document.getElementById("menuOverlay");
+    const menuContent = document.getElementById("menuContent");
+    function showMenu() {
+      menuOverlay.style.display = "flex";
+      if (gameState === "start") {
+        menuContent.innerHTML = `
+          <h1>Space Adventures</h1>
+          <div id="playerSetup">
+            <input type="text" id="playerName" placeholder="Enter your name" />
+            <button id="startButton">Start Game</button>
+          </div>
+          ${getLeaderboardHTML()}
+        `;
+        document.getElementById("startButton").addEventListener("click", () => {
+          const name = document.getElementById("playerName").value.trim();
+          if (name) {
+            currentPlayer = name;
+            hideMenu();
+            resetGame();
+          } else {
+            alert("Please enter your name.");
+          }
+        });
+      } else if (gameState === "gameover") {
+        menuContent.innerHTML = `
+          <h1>Game Over!</h1>
+          <p>Your Score: ${score}</p>
+          <button id="restartButton">Restart Game</button>
+          <button id="menuButton">Main Menu</button>
+          ${getLeaderboardHTML()}
+        `;
+        document.getElementById("restartButton").addEventListener("click", () => {
+          hideMenu();
+          resetGame();
+        });
+        document.getElementById("menuButton").addEventListener("click", () => {
+          gameState = "start";
+          showMenu();
+        });
+      }
+    }
+    function hideMenu() {
+      menuOverlay.style.display = "none";
+    }
+    
+    function resetGame() {
+      ship.y = canvas.height / 2;
+      ship.velocity = 0;
+      obstacles = [];
+      score = 0;
+      lastObstacleTime = Date.now();
+      gameState = "playing";
+    }
+    
+    // Audio effects (update file paths as needed)
+    const jumpSound = new Audio("jump.mp3");
+    const collisionSound = new Audio("collision.mp3");
+    
+    // Main game loop
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawSpaceBackground();
+      
+      if (gameState === "playing") {
+        updateObstacles();
+        updateShip();
+        updateScore();
+      }
+      drawObstacles();
+      drawShip();
+      updateScoreboard();
+      
+      if (gameState === "playing" && checkCollision()) {
+        gameState = "gameover";
+        updatePlayerScore(currentPlayer, score);
+        collisionSound.play();
+        showMenu();
+      }
+      requestAnimationFrame(gameLoop);
+    }
+    
+    // Draw the generated space background
+    function drawSpaceBackground() {
+      // Create a vertical gradient background from deep navy to black
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, "#001");
+      gradient.addColorStop(1, "#000");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw the stars on top
+      updateStars();
+      drawStars();
+    }
+    
+    // Controls: Space key or click to jump
+    document.addEventListener("keydown", function(event) {
+      if (event.code === "Space" && gameState === "playing") {
+        ship.velocity = ship.jumpStrength;
+        jumpSound.play();
+      }
+    });
+    document.addEventListener("click", function() {
+      if (gameState === "playing") {
+        ship.velocity = ship.jumpStrength;
+        jumpSound.play();
+      }
+    });
+    
+    // Start the game loop and display the menu
+    gameLoop();
+    showMenu();
+  </script>
+</body>
+</html>

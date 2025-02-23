@@ -1,0 +1,224 @@
+/* Import global styles to maintain consistency */
+@import url("./styles.css"); 
+
+/* Blog Page Container */
+.blog-container {
+    max-width: 800px;
+    margin: 40px auto;
+    margin-top: 20px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Blog Title */
+.blog-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--bs-primary);
+    margin-bottom: 10px;
+}
+
+/* Blog Metadata (Author, Date, Read Time) */
+.blog-meta {
+    font-size: 0.9rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.blog-meta i {
+    color: var(--bs-primary);
+}
+
+/* Divider */
+.blog-divider {
+    border: none;
+    height: 1px;
+    background: #ddd;
+    margin: 1.5rem 0;
+}
+
+/* Blog Content */
+.blog-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #333;
+}
+
+/* Blog Headings */
+.blog-content h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--bs-primary);
+    margin-bottom: 15px;
+}
+
+.blog-content h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--bs-primary);
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.blog-content h3 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #444;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Paragraph Styling */
+.blog-content p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* Blockquote (For Quotes) */
+.blog-content blockquote {
+    background: #f5f5f5;
+    padding: 15px;
+    border-left: 5px solid var(--bs-primary);
+    font-style: italic;
+    margin: 20px 0;
+    color: #555;
+}
+
+/* Blog Images */
+.blog-content img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 20px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Blog Lists */
+.blog-content ul,
+.blog-content ol {
+    padding-left: 20px;
+    margin-bottom: 20px;
+}
+
+.blog-content li {
+    margin-bottom: 5px;
+}
+
+/* Blog Links */
+.blog-content a {
+    color: var(--bs-primary);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.blog-content a:hover {
+    text-decoration: underline;
+}
+
+/* Code Blocks */
+.blog-content pre {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-size: 0.95rem;
+}
+
+.blog-content code {
+    font-family: "Courier New", Courier, monospace;
+    color: #d63384;
+}
+
+/* Back to Blog Button */
+.back-to-blog {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 10px 15px;
+    background: var(--bs-primary);
+    color: #fff;
+    font-weight: 600;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.back-to-blog:hover {
+    background: #0056b3;
+}
+
+/* Blog Pagination */
+.blog-pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.blog-pagination .page-link {
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: 1px solid var(--bs-primary);
+    color: var(--bs-primary);
+    font-weight: 500;
+    text-decoration: none;
+    margin: 0 5px;
+    transition: 0.3s;
+}
+
+.blog-pagination .page-link:hover {
+    background: var(--bs-primary);
+    color: #fff;
+}
+
+/* Related Posts Section */
+.related-posts {
+    margin-top: 40px;
+}
+
+.related-posts h2 {
+    font-size: 1.6rem;
+    color: var(--bs-primary);
+    margin-bottom: 20px;
+}
+
+.related-posts .post-link {
+    display: block;
+    font-size: 1.1rem;
+    color: #007bff;
+    text-decoration: none;
+    margin-bottom: 10px;
+    transition: 0.3s;
+}
+
+.related-posts .post-link:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .blog-container {
+        padding: 15px;
+    }
+
+    .blog-title {
+        font-size: 2rem;
+    }
+
+    .blog-content {
+        font-size: 1rem;
+    }
+
+    .blog-content h2 {
+        font-size: 1.5rem;
+    }
+
+    .blog-content h3 {
+        font-size: 1.3rem;
+    }
+}

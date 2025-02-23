@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Me - Oscar Stensson</title>
+  <title>Blog - Oscar Stensson</title>
 
   <!-- Bootstrap CSS -->
   <link 
@@ -32,10 +32,10 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
-            <li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
-            <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+          <li class="nav-item"><a class="nav-link active" href="blog.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
 
           <!-- Projects Dropdown -->
           <li class="nav-item dropdown">
@@ -53,11 +53,20 @@
   </nav>
 
   <!-- Hero Section -->
-  <section class="hero">
+<section class="hero">
     <div class="container">
-      <h1>Blog</h1>
+      <h1 class="fw-bold">Blog</h1>
+      <p>Navigate through the latest insights, tutorials, and updates.</p>
     </div>
-  </section>
+</section>
+
+ <!-- Blog Section -->
+<section class="container my-5 text-center">
+    <h2 class="text-primary fw-bold">Latest Blog Posts</h2>
+    <div class="d-flex flex-wrap justify-content-start gap-4" id="blog-posts-container">
+        <!-- Blog Posts will be injected here by JavaScript -->
+    </div>
+</section>
 
   <!-- Footer -->
   <footer>

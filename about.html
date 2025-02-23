@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Me - Oscar Stensson</title>
+
+  <!-- Bootstrap CSS -->
+  <link 
+    rel="stylesheet" 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  />
+  
+  <!-- Font Awesome (Icons) -->
+  <link 
+    rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+  />
+
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="./assets/styles.css">
+
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-primary" href="#">Oscar Stensson</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="about.html">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+
+          <!-- Projects Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="projectsDropdown" role="button" data-bs-toggle="dropdown">
+              Projects
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="projectsDropdown">
+              <li><a class="dropdown-item" href="space-adventures.html">Space Adventures</a></li>
+            </ul>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h1>About Me</h1>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <div class="main-content container my-5">
+    
+    <!-- Work Experience Section -->
+    <h2 class="text-primary fw-bold text-center">Work Experience</h2>
+
+    <div class="experience-card">
+      <div>
+        <h4>Microsoft 365 and SharePoint Developer</h4>
+        <p class="text-muted">CGI · Full-time</p>
+        <p><i class="fa-solid fa-calendar"></i> Nov 2024 - Present · <span id="cgi-duration"></span></p>
+        <p><i class="fa-solid fa-location-dot"></i> Umeå, Västerbotten County, Sweden · Hybrid</p>
+      </div>
+    </div>
+
+    <div class="experience-card">
+      <div>
+        <h4>Microsoft 365 and SharePoint Developer</h4>
+        <p class="text-muted">Sogeti · Full-time</p>
+        <p><i class="fa-solid fa-calendar"></i> Nov 2022 - Nov 2024 · <span id="sogeti-duration"></span></p>
+        <p><i class="fa-solid fa-location-dot"></i> Umeå, Västerbotten, Sweden</p>
+      </div>
+    </div>
+
+    <!-- Skills Section -->
+    <h2 class="mt-4 text-primary fw-bold text-center">Skills</h2>
+<div class="d-flex flex-wrap gap-2">
+    <span class="about-tags">CoPilot</span>
+    <span class="about-tags">Agile Project Management</span>
+    <span class="about-tags">React</span>
+    <span class="about-tags">SharePoint</span>
+    <span class="about-tags">E-Commerce</span>
+    <span class="about-tags">SEO</span>
+    <span class="about-tags">SEM</span>
+    <span class="about-tags">Microsoft Power Platform</span>
+    <span class="about-tags">SPFx</span>
+    <span class="about-tags">Web Design</span>
+    <span class="about-tags">Project Management</span>
+    <span class="about-tags">Microsoft 365</span>
+    <span class="about-tags">Microsoft Azure</span>
+    <span class="about-tags">Python</span>
+    <span class="about-tags">CSS</span>
+    <span class="about-tags">HTML</span>
+    <span class="about-tags">JavaScript</span>
+    <span class="about-tags">C#</span>
+</div>
+
+<!-- Certifications Section -->
+<h2 class="mt-4 text-primary fw-bold text-center">Certifications</h2>
+<div class="certifications-container">
+    
+    <div class="certification-card">
+        <h5 class="cert-title">Google Project Management Professional Certificate</h5>
+        <p class="text-muted"><i class="fa-solid fa-calendar"></i> Issued Nov 2023</p>
+        <p class="text-muted"><i class="fa-brands fa-google"></i> Google Career Certificates</p>
+        <a href="https://www.credly.com/badges/724a44a2-ba46-4a8e-b9f4-ed8fbdcae440/linked_in_profile" class="view-credential" target="_blank">
+            View Credential <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="certification-card">
+        <h5 class="cert-title">Google Digital Marketing & E-commerce Professional Certificate</h5>
+        <p class="text-muted"><i class="fa-solid fa-calendar"></i> Issued Feb 2023</p>
+        <p class="text-muted"><i class="fa-brands fa-google"></i> Google Career Certificates</p>
+        <a href="https://www.credly.com/badges/c8544846-aa86-4e26-95e9-639c7602591e/linked_in_profile" class="view-credential" target="_blank">
+            View Credential <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="certification-card">
+        <h5 class="cert-title">Microsoft Certified: PL900</h5>
+        <p class="text-muted"><i class="fa-solid fa-calendar"></i> Issued Dec 2022</p>
+        <p class="text-muted"><i class="fa-brands fa-microsoft"></i> Microsoft</p>
+        <a href="https://www.credly.com/badges/6823b090-f6c3-4ed0-b59e-a6182ad29edc/linked_in_profile" class="view-credential" target="_blank">
+            View Credential <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="certification-card">
+        <h5 class="cert-title">Microsoft 365 Certified: MS900</h5>
+        <p class="text-muted"><i class="fa-solid fa-calendar"></i> Issued Aug 2022</p>
+        <p class="text-muted"><i class="fa-brands fa-microsoft"></i> Microsoft</p>
+        <a href="https://www.credly.com/badges/1feebd14-75e6-402c-bac0-02d79199e26c/linked_in_profile" class="view-credential" target="_blank">
+            View Credential <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="certification-card">
+        <h5 class="cert-title">Microsoft Azure Certified: AZ900</h5>
+        <p class="text-muted"><i class="fa-solid fa-calendar"></i> Issued Jun 2022</p>
+        <p class="text-muted"><i class="fa-brands fa-microsoft"></i> Microsoft</p>
+        <a href="https://www.credly.com/badges/0c1f5257-1b18-4fbb-bf5e-b38a124327ca" class="view-credential" target="_blank">
+            View Credential <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+
+</div>
+
+  
+  </div> <!-- End of Main Content -->
+
+  <!-- Footer -->
+  <footer>
+    <p class="mb-0">&copy; 2025 Oscar Stensson. All Rights Reserved.</p>
+  </footer>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Global JavaScript -->
+  <script src="./assets/script.js"></script>
+
+</body>
+</html>

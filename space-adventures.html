@@ -694,6 +694,15 @@
         sessionJumps++;
       }
     });
+    // Added touchstart event for immediate response on mobile devices
+    document.addEventListener("touchstart", function(event) {
+      if (gameState === "playing") {
+        ship.velocity = ship.jumpStrength;
+        jumpSound.play();
+        sessionJumps++;
+        event.preventDefault(); // Prevent ghost clicks and delay
+      }
+    }, { passive: false });
 
     // =====================
     // Start

@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Ensures better mobile scaling -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Space Adventures</title>
   <style>
     body {
@@ -60,24 +62,26 @@
     }
     #menuContent {
       text-align: center;
-      max-width: 400px;
-      padding: 30px;
-      border: 2px solid #fff;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #222, #444);
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+      max-width: 500px;
+      padding: 40px;
+      border: 3px solid #fff;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #333, #666);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
     }
     #menuContent h1 {
       margin-top: 0;
       font-size: 36px;
     }
-    #menuContent input[type="text"] {
+    #menuContent input[type="text"],
+    #menuContent select {
       padding: 10px;
       width: 80%;
       margin: 10px 0;
       font-size: 16px;
       border: none;
       border-radius: 5px;
+      outline: none;
     }
     #menuContent button {
       padding: 10px 20px;
@@ -86,12 +90,12 @@
       cursor: pointer;
       border: none;
       border-radius: 5px;
-      background: #008cff;
+      background: linear-gradient(135deg, #008cff, #005fa3);
       color: #fff;
       transition: background 0.3s;
     }
     #menuContent button:hover {
-      background: #005fa3;
+      background: linear-gradient(135deg, #005fa3, #003f73);
     }
     #leaderboard {
       text-align: left;
@@ -105,6 +109,23 @@
       margin: 10px 0;
       font-size: 24px;
     }
+
+    /* =========================
+       Responsive Mobile Styles
+       ========================= */
+    @media (max-width: 600px) {
+      /* Make the game truly full-screen on small devices */
+      #gameContainer {
+        width: 100vw;
+        height: 100vh;
+        border: 0;
+        border-radius: 0;
+      }
+      #menuContent {
+        width: 90%;
+        margin: 0 auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -113,13 +134,19 @@
     <canvas id="gameCanvas"></canvas>
     <div id="scoreboard">Score: 0</div>
   </div>
+
+  <!-- Menu / Overlay -->
   <div id="menuOverlay">
     <div id="menuContent"></div>
   </div>
+
   <script>
-    // Set up canvas inside the container
+    // =====================
+    // Canvas Setup
+    // =====================
     const canvas = document.getElementById("gameCanvas");
     const gameContainer = document.getElementById("gameContainer");
+
     function setCanvasSize() {
       canvas.width = gameContainer.clientWidth;
       canvas.height = gameContainer.clientHeight;
@@ -132,12 +159,18 @@
     
     const ctx = canvas.getContext("2d");
     
-    // Game state variables
+    // =====================
+    // Game State Variables
+    // =====================
     let gameState = "start"; // "start", "playing", "gameover"
     let score = 0;
     let currentPlayer = "";
+    let sessionJumps = 0;
+    let sessionStartTime = 0;
     
-    // Spaceship settings
+    // =====================
+    // Spaceship Settings
+    // =====================
     const ship = {
       x: 50,
       y: 0, // Will be set on resetGame()
@@ -148,24 +181,31 @@
       jumpStrength: -8
     };
     
-    // Obstacle settings
+    // =====================
+    // Obstacle Settings
+    // =====================
     const obstacleWidth = 80;
     const baseObstacleGap = 200;
     const baseObstacleSpeed = 6.0;
     let obstacles = [];
     let obstacleInterval = 2100; // milliseconds between obstacles
-    lastObstacleTime = Date.now() - obstacleInterval + 100; // Spawn sooner
+    let lastObstacleTime = Date.now() - obstacleInterval + 100; // spawn sooner
     
-    // Dynamic difficulty functions
+    // =====================
+    // Dynamic Difficulty
+    // =====================
     function getDynamicObstacleSpeed() {
+      // Lower or raise the max speed as desired
       return Math.min(3.0, baseObstacleSpeed + score * 0.1);
     }
     function getDynamicObstacleGap() {
+      // Lower or raise the minimum gap as desired
       return Math.max(100, baseObstacleGap - score * 2);
     }
     
-    // --- Space Background ---
-    // Create a star field
+    // =====================
+    // Background / Stars
+    // =====================
     let stars = [];
     function initStars() {
       stars = [];
@@ -200,25 +240,23 @@
     }
     
     function drawSpaceBackground() {
-      // Create a vertical gradient background (deep navy to black)
-      let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
       gradient.addColorStop(0, "#001");
       gradient.addColorStop(1, "#000");
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
       updateStars();
       drawStars();
     }
     
-    // --- End Space Background ---
-    
-    // Draw the spaceship emoji rotated so it faces right (3 o'clock)
+    // =====================
+    // Drawing Functions
+    // =====================
     function drawShip() {
       ctx.save();
       // Move to the center of the ship
       ctx.translate(ship.x + ship.width / 2, ship.y + ship.height / 2);
-      // Rotate 90° clockwise
+      // Rotate 45° clockwise
       ctx.rotate(Math.PI / 4);
       ctx.font = "40px sans-serif";
       ctx.textAlign = "center";
@@ -227,7 +265,33 @@
       ctx.restore();
     }
     
-    // Create obstacles with a random gap position
+    function drawObstacles() {
+      obstacles.forEach(obsPair => {
+        // Purple gradient for top obstacle
+        const gradTop = ctx.createLinearGradient(
+          obsPair.topObs.x, 0,
+          obsPair.topObs.x + obstacleWidth, 0
+        );
+        gradTop.addColorStop(0, "#8a2be2");
+        gradTop.addColorStop(1, "#da70d6");
+        ctx.fillStyle = gradTop;
+        ctx.fillRect(obsPair.topObs.x, obsPair.topObs.y, obsPair.topObs.width, obsPair.topObs.height);
+        
+        // Purple gradient for bottom obstacle
+        const gradBottom = ctx.createLinearGradient(
+          obsPair.bottomObs.x, 0,
+          obsPair.bottomObs.x + obstacleWidth, 0
+        );
+        gradBottom.addColorStop(0, "#8a2be2");
+        gradBottom.addColorStop(1, "#da70d6");
+        ctx.fillStyle = gradBottom;
+        ctx.fillRect(obsPair.bottomObs.x, obsPair.bottomObs.y, obsPair.bottomObs.width, obsPair.bottomObs.height);
+      });
+    }
+    
+    // =====================
+    // Obstacle Logic
+    // =====================
     function createObstacle(dynamicGap) {
       const gapY = Math.floor(Math.random() * (canvas.height - dynamicGap - 100)) + 50;
       const topObs = {
@@ -245,7 +309,6 @@
       return { topObs, bottomObs, scored: false };
     }
     
-    // Update obstacles only if game is playing
     function updateObstacles() {
       if (gameState === "playing") {
         const currentSpeed = getDynamicObstacleSpeed();
@@ -261,24 +324,9 @@
       }
     }
     
-    // Draw obstacles with a purple gradient for a sci-fi look
-    function drawObstacles() {
-      obstacles.forEach(obsPair => {
-        const gradTop = ctx.createLinearGradient(obsPair.topObs.x, 0, obsPair.topObs.x + obstacleWidth, 0);
-        gradTop.addColorStop(0, "#8a2be2");
-        gradTop.addColorStop(1, "#da70d6");
-        ctx.fillStyle = gradTop;
-        ctx.fillRect(obsPair.topObs.x, obsPair.topObs.y, obsPair.topObs.width, obsPair.topObs.height);
-        
-        const gradBottom = ctx.createLinearGradient(obsPair.bottomObs.x, 0, obsPair.bottomObs.x + obstacleWidth, 0);
-        gradBottom.addColorStop(0, "#8a2be2");
-        gradBottom.addColorStop(1, "#da70d6");
-        ctx.fillStyle = gradBottom;
-        ctx.fillRect(obsPair.bottomObs.x, obsPair.bottomObs.y, obsPair.bottomObs.width, obsPair.bottomObs.height);
-      });
-    }
-    
-    // Update spaceship position only when playing
+    // =====================
+    // Ship Logic
+    // =====================
     function updateShip() {
       if (gameState === "playing") {
         ship.velocity += ship.gravity;
@@ -286,25 +334,34 @@
       }
     }
     
-    // Collision detection
+    // =====================
+    // Collision & Scoring
+    // =====================
     function checkCollision() {
-      if (ship.y < 0 || ship.y + ship.height > canvas.height) return true;
+      // Check canvas bounds
+      if (ship.y < 0 || ship.y + ship.height > canvas.height) {
+        return true;
+      }
+      // Check obstacles
       for (let obsPair of obstacles) {
         if (
           ship.x < obsPair.topObs.x + obsPair.topObs.width &&
           ship.x + ship.width > obsPair.topObs.x &&
           ship.y < obsPair.topObs.y + obsPair.topObs.height
-        ) return true;
+        ) {
+          return true;
+        }
         if (
           ship.x < obsPair.bottomObs.x + obsPair.bottomObs.width &&
           ship.x + ship.width > obsPair.bottomObs.x &&
           ship.y + ship.height > obsPair.bottomObs.y
-        ) return true;
+        ) {
+          return true;
+        }
       }
       return false;
     }
     
-    // Update score only when playing
     function updateScore() {
       if (gameState === "playing") {
         obstacles.forEach(obsPair => {
@@ -316,13 +373,17 @@
       }
     }
     
-    // Scoreboard update
+    // =====================
+    // Scoreboard
+    // =====================
     const scoreboardDiv = document.getElementById("scoreboard");
     function updateScoreboard() {
       scoreboardDiv.textContent = "Score: " + score;
     }
     
-    // LocalStorage: Leaderboard management functions
+    // =====================
+    // Player Profiles
+    // =====================
     function getPlayers() {
       const players = localStorage.getItem("players");
       return players ? JSON.parse(players) : [];
@@ -330,55 +391,218 @@
     function savePlayers(players) {
       localStorage.setItem("players", JSON.stringify(players));
     }
-    function updatePlayerScore(playerName, newScore) {
+
+    // Sort by totalScore for the leaderboard
+    function sortPlayersByTotalScore(players) {
+      players.sort((a, b) => b.totalScore - a.totalScore);
+    }
+
+    // Update stats after a game
+    function updatePlayerScore(playerName, currentScore, sessionJumps, sessionTime) {
       let players = getPlayers();
       let player = players.find(p => p.name === playerName);
+
+      // If player somehow doesn't exist, initialize them
       if (!player) {
-        player = { name: playerName, score: newScore };
+        player = { 
+          name: playerName, 
+          highScore: 0,
+          gamesPlayed: 0,
+          totalScore: 0,
+          spaceAdventures: 0,
+          totalJumps: 0,
+          obstaclesCleared: 0,
+          totalTime: 0
+        };
         players.push(player);
-      } else {
-        if (newScore > player.score) {
-          player.score = newScore;
-        }
       }
-      players.sort((a, b) => b.score - a.score);
+
+      // Normalize older data (if any) to avoid "undefined"
+      if (player.highScore === undefined) player.highScore = 0;
+      if (player.gamesPlayed === undefined) player.gamesPlayed = 0;
+      if (player.totalScore === undefined) player.totalScore = 0;
+      if (player.spaceAdventures === undefined) player.spaceAdventures = 0;
+      if (player.totalJumps === undefined) player.totalJumps = 0;
+      if (player.obstaclesCleared === undefined) player.obstaclesCleared = 0;
+      if (player.totalTime === undefined) player.totalTime = 0;
+
+      // Update stats
+      player.gamesPlayed += 1;
+      player.totalScore += currentScore;
+      player.spaceAdventures += 1;
+      player.totalJumps += sessionJumps;
+      // Using 'score' as an approximation for obstacles cleared
+      player.obstaclesCleared += currentScore;
+      player.totalTime += sessionTime;
+
+      // Update high score if needed
+      if (currentScore > player.highScore) {
+        player.highScore = currentScore;
+      }
+
+      // Sort the list by total score
+      sortPlayersByTotalScore(players);
       savePlayers(players);
     }
+
+    // Delete player profile
+    function deletePlayerProfile(playerName) {
+      const confirmation = confirm(`Are you sure you want to delete your space pilot (${playerName})?`);
+      if (!confirmation) return;
+
+      let players = getPlayers();
+      // Filter out the player to delete
+      players = players.filter(p => p.name !== playerName);
+      savePlayers(players);
+
+      // Return to main menu
+      gameState = "start";
+      showMenu();
+    }
+
+    // Return the leaderboard (showing high score or total score, adjust as needed)
     function getLeaderboardHTML() {
       let players = getPlayers();
-      let html = "<h2>Top Players</h2><ol>";
+      sortPlayersByTotalScore(players);
+      let html = "<div id='leaderboard'><h2>Top Players</h2><ol>";
       players.forEach(p => {
-        html += `<li>${p.name}: ${p.score}</li>`;
+        html += `<li>${p.name} - Highest Score: ${p.highScore}</li>`;
       });
-      html += "</ol>";
+      html += "</ol></div>";
       return html;
     }
-    
-    // Menu overlay management
+
+    // Return a detailed profile for a specific player
+    function getPlayerProfileHTML(playerName) {
+      const players = getPlayers();
+      const player = players.find(p => p.name === playerName);
+
+      if (!player) {
+        return `<p>Player <strong>${playerName}</strong> not found.</p>`;
+      }
+
+      // Normalize data to avoid undefined values
+      if (player.highScore === undefined) player.highScore = 0;
+      if (player.gamesPlayed === undefined) player.gamesPlayed = 0;
+      if (player.totalScore === undefined) player.totalScore = 0;
+      if (player.spaceAdventures === undefined) player.spaceAdventures = 0;
+      if (player.totalJumps === undefined) player.totalJumps = 0;
+      if (player.obstaclesCleared === undefined) player.obstaclesCleared = 0;
+      if (player.totalTime === undefined) player.totalTime = 0;
+
+      return `
+        <h2 style="margin-bottom: 20px;">Player Profile</h2>
+        <div style="text-align: left;">
+          <p><strong>Pilot:</strong> ${player.name}</p>
+          <p><strong>High Score:</strong> ${player.highScore}</p>
+          <p><strong>Total Score:</strong> ${player.totalScore}</p>
+          <p><strong>Space Adventures:</strong> ${player.spaceAdventures}</p>
+          <p><strong>Total Jumps:</strong> ${player.totalJumps}</p>
+          <p><strong>Obstacles Cleared:</strong> ${player.obstaclesCleared}</p>
+          <p><strong>Total mission time:</strong> ${player.totalTime.toFixed(1)} seconds</p>
+        </div>
+      `;
+    }
+
+    // =====================
+    // Menu Overlay
+    // =====================
     const menuOverlay = document.getElementById("menuOverlay");
     const menuContent = document.getElementById("menuContent");
+
+    // Populate player selection dropdown
+    function populatePlayerSelect() {
+      const players = getPlayers();
+      const playerSelect = document.getElementById("playerSelect");
+      playerSelect.innerHTML = "";
+      players.forEach(player => {
+        const option = document.createElement("option");
+        option.value = player.name;
+        option.textContent = player.name;
+        playerSelect.appendChild(option);
+      });
+    }
+
+    // Show the "Profile Screen" for the selected player
+    function showProfileScreen(playerName) {
+      const profileHTML = getPlayerProfileHTML(playerName);
+      menuContent.innerHTML = `
+        ${profileHTML}
+        <button id="startGameButton">Start Game</button>
+        <button id="deletePlayerButton">Delete Player</button>
+        <button id="backButton">Back</button>
+      `;
+
+      // Start game
+      document.getElementById("startGameButton").addEventListener("click", () => {
+        hideMenu();
+        resetGame();
+      });
+
+      // Delete player
+      document.getElementById("deletePlayerButton").addEventListener("click", () => {
+        deletePlayerProfile(playerName);
+      });
+
+      // Go back to main menu
+      document.getElementById("backButton").addEventListener("click", () => {
+        showMenu();
+      });
+    }
+
+    // Main menu logic
     function showMenu() {
       menuOverlay.style.display = "flex";
+
       if (gameState === "start") {
+        // Show main menu (player select + leaderboard)
         menuContent.innerHTML = `
           <h1>Space Adventures</h1>
           <div id="playerSetup">
-            <input type="text" id="playerName" placeholder="Enter your name" />
-            <button id="startButton">Start Game</button>
+            <select id="playerSelect"></select>
+            <br>
+            <input type="text" id="newPlayerName" placeholder="Or enter new name" />
+            <br>
+            <button id="selectButton">Select / Create Player</button>
           </div>
           ${getLeaderboardHTML()}
         `;
-        document.getElementById("startButton").addEventListener("click", () => {
-          const name = document.getElementById("playerName").value.trim();
-          if (name) {
-            currentPlayer = name;
-            hideMenu();
-            resetGame();
-          } else {
-            alert("Please enter your name.");
+        // Populate dropdown with existing players
+        populatePlayerSelect();
+
+        // When user selects/creates a player
+        document.getElementById("selectButton").addEventListener("click", () => {
+          const selectElem = document.getElementById("playerSelect");
+          const newName = document.getElementById("newPlayerName").value.trim();
+          currentPlayer = newName || selectElem.value;
+
+          if (!currentPlayer) {
+            alert("Please select or enter a name.");
+            return;
           }
+
+          // Initialize new player if not found
+          let players = getPlayers();
+          if (!players.find(p => p.name === currentPlayer)) {
+            players.push({
+              name: currentPlayer,
+              highScore: 0,
+              gamesPlayed: 0,
+              totalScore: 0,
+              spaceAdventures: 0,
+              totalJumps: 0,
+              obstaclesCleared: 0,
+              totalTime: 0
+            });
+            savePlayers(players);
+          }
+
+          // After selection/creation, show the player's profile
+          showProfileScreen(currentPlayer);
         });
+
       } else if (gameState === "gameover") {
+        // Show game over screen
         menuContent.innerHTML = `
           <h1>Game Over!</h1>
           <p>Your Score: ${score}</p>
@@ -386,6 +610,7 @@
           <button id="menuButton">Main Menu</button>
           ${getLeaderboardHTML()}
         `;
+
         document.getElementById("restartButton").addEventListener("click", () => {
           hideMenu();
           resetGame();
@@ -396,26 +621,36 @@
         });
       }
     }
+
     function hideMenu() {
       menuOverlay.style.display = "none";
     }
     
-  function resetGame() {
-  ship.y = canvas.height / 2;
-  ship.velocity = 0;
-  obstacles = [];
-  score = 0;
-  lastObstacleTime = Date.now();
-  gameState = "playing";
-  obstacles.push(createObstacle(getDynamicObstacleGap()));
-  }
+    // =====================
+    // Game Flow
+    // =====================
+    function resetGame() {
+      ship.y = canvas.height / 2;
+      ship.velocity = 0;
+      obstacles = [];
+      score = 0;
+      lastObstacleTime = Date.now();
+      gameState = "playing";
+      sessionJumps = 0;
+      sessionStartTime = Date.now();
+      obstacles.push(createObstacle(getDynamicObstacleGap()));
+    }
 
-    
-    // Audio effects (update file paths as needed)
+    // =====================
+    // Audio
+    // =====================
+    // Replace with your own audio file paths
     const jumpSound = new Audio("jump.mp3");
     const collisionSound = new Audio("collision.mp3");
-    
-    // Main game loop
+
+    // =====================
+    // Main Game Loop
+    // =====================
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawSpaceBackground();
@@ -429,44 +664,40 @@
       drawShip();
       updateScoreboard();
       
+      // Check for collision
       if (gameState === "playing" && checkCollision()) {
         gameState = "gameover";
-        updatePlayerScore(currentPlayer, score);
+        let sessionTime = (Date.now() - sessionStartTime) / 1000; // in seconds
+        updatePlayerScore(currentPlayer, score, sessionJumps, sessionTime);
         collisionSound.play();
         showMenu();
       }
       requestAnimationFrame(gameLoop);
     }
-    
-    // Draw the generated space background
-    function drawSpaceBackground() {
-      // Create a vertical gradient background from deep navy to black
-      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      gradient.addColorStop(0, "#001");
-      gradient.addColorStop(1, "#000");
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw the stars on top
-      updateStars();
-      drawStars();
-    }
-    
-    // Controls: Space key or click to jump
+
+    // =====================
+    // Input Handlers
+    // =====================
     document.addEventListener("keydown", function(event) {
+      // For desktop keyboards
       if (event.code === "Space" && gameState === "playing") {
         ship.velocity = ship.jumpStrength;
         jumpSound.play();
+        sessionJumps++;
       }
     });
     document.addEventListener("click", function() {
+      // For mobile / click
       if (gameState === "playing") {
         ship.velocity = ship.jumpStrength;
         jumpSound.play();
+        sessionJumps++;
       }
     });
-    
-    // Start the game loop and display the menu
+
+    // =====================
+    // Start
+    // =====================
     gameLoop();
     showMenu();
   </script>

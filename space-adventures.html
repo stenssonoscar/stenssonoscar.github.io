@@ -393,8 +393,8 @@
     }
 
     // Sort by totalScore for the leaderboard
-    function sortPlayersByTotalScore(players) {
-      players.sort((a, b) => b.totalScore - a.totalScore);
+    function sortPlayersByHighScore(players) {
+      players.sort((a, b) => b.highScore - a.highScore);
     }
 
     // Update stats after a game
@@ -441,7 +441,7 @@
       }
 
       // Sort the list by total score
-      sortPlayersByTotalScore(players);
+      sortPlayersByHighScore(players);
       savePlayers(players);
     }
 
@@ -463,7 +463,7 @@
     // Return the leaderboard (showing high score or total score, adjust as needed)
     function getLeaderboardHTML() {
       let players = getPlayers();
-      sortPlayersByTotalScore(players);
+      sortPlayersByHighScore(players);
       let html = "<div id='leaderboard'><h2>Top Players</h2><ol>";
       players.forEach(p => {
         html += `<li>${p.name} - Highest Score: ${p.highScore}</li>`;

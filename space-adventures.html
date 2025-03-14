@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Import Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <!-- Ensures better mobile scaling -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Space Adventures</title>
@@ -61,60 +63,70 @@
       color: #fff;
     }
     #menuContent {
+      position: relative;
       text-align: center;
-      max-width: 500px;
-      padding: 40px;
+      width: 600px;
+      max-width: 90%;
+      padding: 30px;
       border: 3px solid #fff;
       border-radius: 15px;
-      background: linear-gradient(135deg, #333, #666);
+      background: radial-gradient(circle at 50% 110%, #223 30%, #003 70%, #001 100%);
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+      animation: fadeIn 0.5s ease-out;
     }
-    #menuContent h1 {
-      margin-top: 0;
-      font-size: 36px;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
     }
-    #menuContent input[type="text"],
-    #menuContent select {
-      padding: 10px;
-      width: 80%;
-      margin: 10px 0;
-      font-size: 16px;
+    /* Large stylized title */
+    .menuTitle {
+      font-size: 50px;
+      margin: 0;
+      margin-bottom: 20px;
+      color: #9a9ae1;
+      text-shadow: 2px 2px 0 #000, 4px 4px 0 #666;
+      letter-spacing: 2px;
+    }
+    /* Big "cartoon" buttons */
+    .menuButton {
+      display: inline-flex;             /* Important for icon + text alignment */
+      align-items: center;             /* Vertically center icon + text */
+      justify-content: center;         /* Center them horizontally within the button */
+      margin: 15px;
+      padding: 20px 40px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      background-image: linear-gradient(to right top, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
       border: none;
-      border-radius: 5px;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+      text-shadow: 2px 2px 0 #000;
+    }
+    .menuButton:hover {
+      background:  #69bff8;
+      transform: scale(1.05);
+    }
+    /* Class for icons inside the button */
+    .menuButton .icon {
+      font-size: 30px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    /* Inputs for profile selection, settings, etc. */
+    .inputField, .selectField {
+      display: block;
+      width: 80%;
+      margin: 10px auto;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
       outline: none;
     }
-    #menuContent button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin: 10px;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      background: linear-gradient(135deg, #008cff, #005fa3);
-      color: #fff;
-      transition: background 0.3s;
-    }
-    #menuContent button:hover {
-      background: linear-gradient(135deg, #005fa3, #003f73);
-    }
-    #leaderboard {
-      text-align: left;
-      margin-top: 20px;
-      max-height: 200px;
-      overflow-y: auto;
-      border-top: 1px solid #fff;
-      padding-top: 10px;
-    }
-    #leaderboard h2 {
-      margin: 10px 0;
-      font-size: 24px;
-    }
-
-    /* =========================
-       Responsive Mobile Styles
-       ========================= */
+    /* Responsive Mobile Styles */
     @media (max-width: 600px) {
-      /* Make the game truly full-screen on small devices */
       #gameContainer {
         width: 100vw;
         height: 100vh;
@@ -124,6 +136,16 @@
       #menuContent {
         width: 90%;
         margin: 0 auto;
+      }
+      .menuTitle {
+        font-size: 40px;
+      }
+      .menuButton {
+        margin: 10px;
+        font-size: 20px;
+      }
+      .menuButton .icon {
+        font-size: 24px;
       }
     }
   </style>
@@ -137,7 +159,9 @@
 
   <!-- Menu / Overlay -->
   <div id="menuOverlay">
-    <div id="menuContent"></div>
+    <div id="menuContent">
+      <!-- The contents of this div will be dynamically replaced by JS -->
+    </div>
   </div>
 
   <script>
@@ -162,18 +186,32 @@
     // =====================
     // Game State Variables
     // =====================
-    let gameState = "start"; // "start", "playing", "gameover"
+    let gameState = "main"; // "main", "playing", "gameover"
+    let menuScreen = "mainMenu"; // "mainMenu", "profileSelect", "scoreboard", "settings", "gameover"
+    
     let score = 0;
     let currentPlayer = "";
     let sessionJumps = 0;
     let sessionStartTime = 0;
     
     // =====================
+    // Game Settings
+    // =====================
+    const settings = {
+      speed: "normal", // "slow", "normal", "fast"
+      sound: true
+    };
+
+    // Background music
+    const backgroundMusic = new Audio("assets/Galactic Dreams.mp3");
+    backgroundMusic.loop = true;
+
+    // =====================
     // Spaceship Settings
     // =====================
     const ship = {
       x: 50,
-      y: 0, // Will be set on resetGame()
+      y: 0,
       width: 40,
       height: 40,
       velocity: 0,
@@ -185,21 +223,33 @@
     // Obstacle Settings
     // =====================
     const obstacleWidth = 80;
-    const baseObstacleGap = 200;
-    const baseObstacleSpeed = 6.0;
+    let baseObstacleGap = 200;
+    let baseObstacleSpeed = 6.0;
+    let obstacleInterval = 2100; // ms between obstacles
     let obstacles = [];
-    let obstacleInterval = 2100; // milliseconds between obstacles
-    let lastObstacleTime = Date.now() - obstacleInterval + 100; // spawn sooner
+    let lastObstacleTime = Date.now() - obstacleInterval + 100;
     
-    // =====================
-    // Dynamic Difficulty
-    // =====================
+    function updateSettingsBasedValues() {
+      if (settings.speed === "slow") {
+        baseObstacleSpeed = 3.0;
+        baseObstacleGap = 250;
+        obstacleInterval = 2500;
+      } else if (settings.speed === "fast") {
+        baseObstacleSpeed = 9.0;
+        baseObstacleGap = 150;
+        obstacleInterval = 1700;
+      } else {
+        baseObstacleSpeed = 6.0;
+        baseObstacleGap = 200;
+        obstacleInterval = 2100;
+      }
+    }
+    updateSettingsBasedValues();
+    
     function getDynamicObstacleSpeed() {
-      // Lower or raise the max speed as desired
-      return Math.min(3.0, baseObstacleSpeed + score * 0.1);
+      return baseObstacleSpeed + score * 0.1;
     }
     function getDynamicObstacleGap() {
-      // Lower or raise the minimum gap as desired
       return Math.max(100, baseObstacleGap - score * 2);
     }
     
@@ -254,9 +304,7 @@
     // =====================
     function drawShip() {
       ctx.save();
-      // Move to the center of the ship
       ctx.translate(ship.x + ship.width / 2, ship.y + ship.height / 2);
-      // Rotate 45° clockwise
       ctx.rotate(Math.PI / 4);
       ctx.font = "40px sans-serif";
       ctx.textAlign = "center";
@@ -267,7 +315,6 @@
     
     function drawObstacles() {
       obstacles.forEach(obsPair => {
-        // Purple gradient for top obstacle
         const gradTop = ctx.createLinearGradient(
           obsPair.topObs.x, 0,
           obsPair.topObs.x + obstacleWidth, 0
@@ -277,7 +324,6 @@
         ctx.fillStyle = gradTop;
         ctx.fillRect(obsPair.topObs.x, obsPair.topObs.y, obsPair.topObs.width, obsPair.topObs.height);
         
-        // Purple gradient for bottom obstacle
         const gradBottom = ctx.createLinearGradient(
           obsPair.bottomObs.x, 0,
           obsPair.bottomObs.x + obstacleWidth, 0
@@ -338,11 +384,9 @@
     // Collision & Scoring
     // =====================
     function checkCollision() {
-      // Check canvas bounds
       if (ship.y < 0 || ship.y + ship.height > canvas.height) {
         return true;
       }
-      // Check obstacles
       for (let obsPair of obstacles) {
         if (
           ship.x < obsPair.topObs.x + obsPair.topObs.width &&
@@ -391,18 +435,12 @@
     function savePlayers(players) {
       localStorage.setItem("players", JSON.stringify(players));
     }
-
-    // Sort by totalScore for the leaderboard
     function sortPlayersByHighScore(players) {
       players.sort((a, b) => b.highScore - a.highScore);
     }
-
-    // Update stats after a game
     function updatePlayerScore(playerName, currentScore, sessionJumps, sessionTime) {
       let players = getPlayers();
       let player = players.find(p => p.name === playerName);
-
-      // If player somehow doesn't exist, initialize them
       if (!player) {
         player = { 
           name: playerName, 
@@ -416,51 +454,26 @@
         };
         players.push(player);
       }
-
-      // Normalize older data (if any) to avoid "undefined"
-      if (player.highScore === undefined) player.highScore = 0;
-      if (player.gamesPlayed === undefined) player.gamesPlayed = 0;
-      if (player.totalScore === undefined) player.totalScore = 0;
-      if (player.spaceAdventures === undefined) player.spaceAdventures = 0;
-      if (player.totalJumps === undefined) player.totalJumps = 0;
-      if (player.obstaclesCleared === undefined) player.obstaclesCleared = 0;
-      if (player.totalTime === undefined) player.totalTime = 0;
-
-      // Update stats
-      player.gamesPlayed += 1;
-      player.totalScore += currentScore;
-      player.spaceAdventures += 1;
-      player.totalJumps += sessionJumps;
-      // Using 'score' as an approximation for obstacles cleared
-      player.obstaclesCleared += currentScore;
-      player.totalTime += sessionTime;
-
-      // Update high score if needed
+      player.gamesPlayed = (player.gamesPlayed || 0) + 1;
+      player.totalScore = (player.totalScore || 0) + currentScore;
+      player.spaceAdventures = (player.spaceAdventures || 0) + 1;
+      player.totalJumps = (player.totalJumps || 0) + sessionJumps;
+      player.obstaclesCleared = (player.obstaclesCleared || 0) + currentScore;
+      player.totalTime = (player.totalTime || 0) + sessionTime;
       if (currentScore > player.highScore) {
         player.highScore = currentScore;
       }
-
-      // Sort the list by total score
       sortPlayersByHighScore(players);
       savePlayers(players);
     }
-
-    // Delete player profile
     function deletePlayerProfile(playerName) {
-      const confirmation = confirm(`Are you sure you want to delete your space pilot (${playerName})?`);
-      if (!confirmation) return;
-
+      if (!confirm(`Are you sure you want to delete your space pilot (${playerName})?`)) return;
       let players = getPlayers();
-      // Filter out the player to delete
       players = players.filter(p => p.name !== playerName);
       savePlayers(players);
-
-      // Return to main menu
-      gameState = "start";
-      showMenu();
+      menuScreen = "mainMenu";
+      showMenuScreen();
     }
-
-    // Return the leaderboard (showing high score or total score, adjust as needed)
     function getLeaderboardHTML() {
       let players = getPlayers();
       sortPlayersByHighScore(players);
@@ -471,164 +484,297 @@
       html += "</ol></div>";
       return html;
     }
-
-    // Return a detailed profile for a specific player
     function getPlayerProfileHTML(playerName) {
       const players = getPlayers();
       const player = players.find(p => p.name === playerName);
-
-      if (!player) {
-        return `<p>Player <strong>${playerName}</strong> not found.</p>`;
-      }
-
-      // Normalize data to avoid undefined values
-      if (player.highScore === undefined) player.highScore = 0;
-      if (player.gamesPlayed === undefined) player.gamesPlayed = 0;
-      if (player.totalScore === undefined) player.totalScore = 0;
-      if (player.spaceAdventures === undefined) player.spaceAdventures = 0;
-      if (player.totalJumps === undefined) player.totalJumps = 0;
-      if (player.obstaclesCleared === undefined) player.obstaclesCleared = 0;
-      if (player.totalTime === undefined) player.totalTime = 0;
-
+      if (!player) return `<p>Player <strong>${playerName}</strong> not found.</p>`;
       return `
-        <h2 style="margin-bottom: 20px;">Player Profile</h2>
+        <h2 style="margin-bottom: 20px;">Pilot Profile</h2>
         <div style="text-align: left;">
-          <p><strong>Pilot:</strong> ${player.name}</p>
+          <p><strong>Name:</strong> ${player.name}</p>
           <p><strong>High Score:</strong> ${player.highScore}</p>
           <p><strong>Total Score:</strong> ${player.totalScore}</p>
           <p><strong>Space Adventures:</strong> ${player.spaceAdventures}</p>
           <p><strong>Total Jumps:</strong> ${player.totalJumps}</p>
           <p><strong>Obstacles Cleared:</strong> ${player.obstaclesCleared}</p>
-          <p><strong>Total mission time:</strong> ${player.totalTime.toFixed(1)} seconds</p>
+          <p><strong>Total Mission Time:</strong> ${player.totalTime.toFixed(1)} seconds</p>
         </div>
       `;
     }
-
+    
     // =====================
-    // Menu Overlay
+    // Audio & Input
+    // =====================
+    const jumpSound = new Audio("jump.mp3");
+    const collisionSound = new Audio("collision.mp3");
+    const gameOverSound = new Audio("assets/Game Over.mp3");
+
+    function playSound(sound) {
+      if (settings.sound) {
+        sound.currentTime = 0;
+        sound.play();
+      }
+    }
+
+    document.addEventListener("keydown", function(event) {
+      if (event.code === "Space" && gameState === "playing") {
+        ship.velocity = ship.jumpStrength;
+        playSound(jumpSound);
+        sessionJumps++;
+      }
+    });
+    document.addEventListener("click", function() {
+      if (gameState === "playing") {
+        ship.velocity = ship.jumpStrength;
+        playSound(jumpSound);
+        sessionJumps++;
+      }
+    });
+    document.addEventListener("touchstart", function(event) {
+      if (gameState === "playing") {
+        ship.velocity = ship.jumpStrength;
+        playSound(jumpSound);
+        sessionJumps++;
+        event.preventDefault();
+      }
+    }, { passive: false });
+    
+    // =====================
+    // Menu Screens
     // =====================
     const menuOverlay = document.getElementById("menuOverlay");
     const menuContent = document.getElementById("menuContent");
 
-    // Populate player selection dropdown
-    function populatePlayerSelect() {
-      const players = getPlayers();
-      const playerSelect = document.getElementById("playerSelect");
-      playerSelect.innerHTML = "";
-      players.forEach(player => {
-        const option = document.createElement("option");
-        option.value = player.name;
-        option.textContent = player.name;
-        playerSelect.appendChild(option);
+    // 1. Main Menu
+    function showMainMenu() {
+      menuContent.innerHTML = `
+        <h1 class="menuTitle">Space Adventures</h1>
+        <button class="menuButton" id="playButton">
+          <span class="material-icons icon">rocket_launch</span>
+          <span>PLAY</span>
+        </button>
+        <br>
+        <button class="menuButton" id="scoreboardButton">
+          <span class="material-icons icon">emoji_events</span>
+          <span>Scoreboard</span>
+        </button>
+        <button class="menuButton" id="settingsButton">
+          <span class="material-icons icon">settings</span>
+          <span>Settings</span>
+        </button>
+      `;
+      menuOverlay.style.display = "flex";
+
+      document.getElementById("playButton").addEventListener("click", () => {
+        menuScreen = "profileSelect";
+        showMenuScreen();
+      });
+      document.getElementById("scoreboardButton").addEventListener("click", () => {
+        menuScreen = "scoreboard";
+        showMenuScreen();
+      });
+      document.getElementById("settingsButton").addEventListener("click", () => {
+        menuScreen = "settings";
+        showMenuScreen();
       });
     }
 
-    // Show the "Profile Screen" for the selected player
+    // 2. Profile Selection Screen
+    function showProfileSelection() {
+      let players = getPlayers();
+      let optionsHTML = "";
+      players.forEach(p => {
+        optionsHTML += `<option value="${p.name}">${p.name}</option>`;
+      });
+
+      menuContent.innerHTML = `
+        <h2 style="margin-bottom:20px;">Select/Create Pilot</h2>
+        <select class="selectField" id="playerSelect">${optionsHTML}</select>
+        <input type="text" class="inputField" id="newPlayerName" placeholder="Or enter new name" />
+        <br>
+        <button class="menuButton" id="selectButton">
+          <span class="material-icons icon">person_add</span>
+          <span>Choose Pilot</span>
+        </button>
+        <button class="menuButton" id="backButton">
+          <span class="material-icons icon">arrow_back</span>
+          <span>Back</span>
+        </button>
+      `;
+      menuOverlay.style.display = "flex";
+
+      document.getElementById("selectButton").addEventListener("click", () => {
+        const selectElem = document.getElementById("playerSelect");
+        const newName = document.getElementById("newPlayerName").value.trim();
+        currentPlayer = newName || selectElem.value;
+        if (!currentPlayer) {
+          alert("Please select or enter a name.");
+          return;
+        }
+        let players = getPlayers();
+        if (!players.find(p => p.name === currentPlayer)) {
+          players.push({
+            name: currentPlayer,
+            highScore: 0,
+            gamesPlayed: 0,
+            totalScore: 0,
+            spaceAdventures: 0,
+            totalJumps: 0,
+            obstaclesCleared: 0,
+            totalTime: 0
+          });
+          savePlayers(players);
+        }
+        showProfileScreen(currentPlayer);
+      });
+      document.getElementById("backButton").addEventListener("click", () => {
+        menuScreen = "mainMenu";
+        showMenuScreen();
+      });
+    }
+
+    // 2a. Profile Details Screen
     function showProfileScreen(playerName) {
       const profileHTML = getPlayerProfileHTML(playerName);
       menuContent.innerHTML = `
         ${profileHTML}
-        <button id="startGameButton">Start Game</button>
-        <button id="deletePlayerButton">Delete Player</button>
-        <button id="backButton">Back</button>
+        <br>
+        <button class="menuButton" id="startGameButton">
+          <span class="material-icons icon">play_arrow</span>
+          <span>Start Game</span>
+        </button>
+        <button class="menuButton" id="deletePlayerButton">
+          <span class="material-icons icon">delete</span>
+          <span>Delete Player</span>
+        </button>
+        <button class="menuButton" id="backButton">
+          <span class="material-icons icon">arrow_back</span>
+          <span>Back</span>
+        </button>
       `;
+      menuOverlay.style.display = "flex";
 
-      // Start game
       document.getElementById("startGameButton").addEventListener("click", () => {
         hideMenu();
-        resetGame();
+        startGame();
       });
-
-      // Delete player
       document.getElementById("deletePlayerButton").addEventListener("click", () => {
         deletePlayerProfile(playerName);
       });
-
-      // Go back to main menu
       document.getElementById("backButton").addEventListener("click", () => {
-        showMenu();
+        showProfileSelection();
       });
     }
 
-    // Main menu logic
-    function showMenu() {
+    // 3. Scoreboard Screen
+    function showScoreboardScreen() {
+      const leaderboardHTML = getLeaderboardHTML();
+      menuContent.innerHTML = `
+        <h2>Scoreboard</h2>
+        ${leaderboardHTML}
+        <button class="menuButton" id="backButton">
+          <span class="material-icons icon">arrow_back</span>
+          <span>Back</span>
+        </button>
+      `;
       menuOverlay.style.display = "flex";
 
-      if (gameState === "start") {
-        // Show main menu (player select + leaderboard)
-        menuContent.innerHTML = `
-          <h1>Space Adventures</h1>
-          <div id="playerSetup">
-            <select id="playerSelect"></select>
-            <br>
-            <input type="text" id="newPlayerName" placeholder="Or enter new name" />
-            <br>
-            <button id="selectButton">Select / Create Player</button>
-          </div>
-          ${getLeaderboardHTML()}
-        `;
-        // Populate dropdown with existing players
-        populatePlayerSelect();
+      document.getElementById("backButton").addEventListener("click", () => {
+        menuScreen = "mainMenu";
+        showMenuScreen();
+      });
+    }
 
-        // When user selects/creates a player
-        document.getElementById("selectButton").addEventListener("click", () => {
-          const selectElem = document.getElementById("playerSelect");
-          const newName = document.getElementById("newPlayerName").value.trim();
-          currentPlayer = newName || selectElem.value;
+    // 4. Settings Screen
+    function showSettingsScreen() {
+      menuContent.innerHTML = `
+        <h2>Settings</h2>
+        <div style="margin: 20px 0;">
+          <label style="font-size:18px;">Game Speed:</label>
+          <select class="selectField" id="speedSelect">
+            <option value="slow" ${settings.speed === "slow" ? "selected" : ""}>Slow</option>
+            <option value="normal" ${settings.speed === "normal" ? "selected" : ""}>Normal</option>
+            <option value="fast" ${settings.speed === "fast" ? "selected" : ""}>Fast</option>
+          </select>
+        </div>
+        <div style="margin: 20px 0;">
+          <label style="font-size:18px;">Sound:</label>
+          <input type="checkbox" id="soundToggle" style="transform: scale(1.5); margin-left:10px;" ${settings.sound ? "checked" : ""}/>
+        </div>
+        <button class="menuButton" id="saveSettingsButton">
+          <span class="material-icons icon">save</span>
+          <span>Save Settings</span>
+        </button>
+        <button class="menuButton" id="backButton">
+          <span class="material-icons icon">arrow_back</span>
+          <span>Back</span>
+        </button>
+      `;
+      menuOverlay.style.display = "flex";
 
-          if (!currentPlayer) {
-            alert("Please select or enter a name.");
-            return;
-          }
+      document.getElementById("saveSettingsButton").addEventListener("click", () => {
+        settings.speed = document.getElementById("speedSelect").value;
+        settings.sound = document.getElementById("soundToggle").checked;
+        updateSettingsBasedValues();
+        alert("Settings saved!");
+      });
+      document.getElementById("backButton").addEventListener("click", () => {
+        menuScreen = "mainMenu";
+        showMenuScreen();
+      });
+    }
 
-          // Initialize new player if not found
-          let players = getPlayers();
-          if (!players.find(p => p.name === currentPlayer)) {
-            players.push({
-              name: currentPlayer,
-              highScore: 0,
-              gamesPlayed: 0,
-              totalScore: 0,
-              spaceAdventures: 0,
-              totalJumps: 0,
-              obstaclesCleared: 0,
-              totalTime: 0
-            });
-            savePlayers(players);
-          }
+    // 5. Game Over Screen
+    function showGameOverScreen() {
+      menuOverlay.style.display = "flex";
+      menuContent.innerHTML = `
+        <h1 class="menuTitle" style="font-size: 40px;">Game Over!</h1>
+        <p>Your Score: ${score}</p>
+        <button class="menuButton" id="restartButton">
+          <span class="material-icons icon">replay</span>
+          <span>Restart</span>
+        </button>
+        <button class="menuButton" id="menuButton">
+          <span class="material-icons icon">home</span>
+          <span>Main Menu</span>
+        </button>
+      `;
+      document.getElementById("restartButton").addEventListener("click", () => {
+        hideMenu();
+        resetGame();
+        if (settings.sound) backgroundMusic.play();
+      });
+      document.getElementById("menuButton").addEventListener("click", () => {
+        gameState = "main";
+        menuScreen = "mainMenu";
+        showMenuScreen();
+      });
+    }
 
-          // After selection/creation, show the player's profile
-          showProfileScreen(currentPlayer);
-        });
-
-      } else if (gameState === "gameover") {
-        // Show game over screen
-        menuContent.innerHTML = `
-          <h1>Game Over!</h1>
-          <p>Your Score: ${score}</p>
-          <button id="restartButton">Restart Game</button>
-          <button id="menuButton">Main Menu</button>
-          ${getLeaderboardHTML()}
-        `;
-
-        document.getElementById("restartButton").addEventListener("click", () => {
-          hideMenu();
-          resetGame();
-        });
-        document.getElementById("menuButton").addEventListener("click", () => {
-          gameState = "start";
-          showMenu();
-        });
+    // Master function to display the correct menu screen
+    function showMenuScreen() {
+      switch (menuScreen) {
+        case "mainMenu":      showMainMenu();       break;
+        case "profileSelect": showProfileSelection();break;
+        case "scoreboard":    showScoreboardScreen();break;
+        case "settings":      showSettingsScreen();  break;
+        case "gameover":      showGameOverScreen();  break;
+        default:              showMainMenu();        break;
       }
     }
 
     function hideMenu() {
       menuOverlay.style.display = "none";
     }
-    
+
     // =====================
     // Game Flow
     // =====================
+    function startGame() {
+      resetGame();
+      if (settings.sound) backgroundMusic.play();
+    }
+
     function resetGame() {
       ship.y = canvas.height / 2;
       ship.velocity = 0;
@@ -642,19 +788,11 @@
     }
 
     // =====================
-    // Audio
-    // =====================
-    // Replace with your own audio file paths
-    const jumpSound = new Audio("jump.mp3");
-    const collisionSound = new Audio("collision.mp3");
-
-    // =====================
     // Main Game Loop
     // =====================
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawSpaceBackground();
-      
       if (gameState === "playing") {
         updateObstacles();
         updateShip();
@@ -663,52 +801,25 @@
       drawObstacles();
       drawShip();
       updateScoreboard();
-      
-      // Check for collision
+
       if (gameState === "playing" && checkCollision()) {
         gameState = "gameover";
-        let sessionTime = (Date.now() - sessionStartTime) / 1000; // in seconds
+        const sessionTime = (Date.now() - sessionStartTime) / 1000;
         updatePlayerScore(currentPlayer, score, sessionJumps, sessionTime);
-        collisionSound.play();
-        showMenu();
+        playSound(collisionSound);
+        playSound(gameOverSound);
+        backgroundMusic.pause();
+        menuScreen = "gameover";
+        showGameOverScreen();
       }
       requestAnimationFrame(gameLoop);
     }
 
     // =====================
-    // Input Handlers
-    // =====================
-    document.addEventListener("keydown", function(event) {
-      // For desktop keyboards
-      if (event.code === "Space" && gameState === "playing") {
-        ship.velocity = ship.jumpStrength;
-        jumpSound.play();
-        sessionJumps++;
-      }
-    });
-    document.addEventListener("click", function() {
-      // For mobile / click
-      if (gameState === "playing") {
-        ship.velocity = ship.jumpStrength;
-        jumpSound.play();
-        sessionJumps++;
-      }
-    });
-    // Added touchstart event for immediate response on mobile devices
-    document.addEventListener("touchstart", function(event) {
-      if (gameState === "playing") {
-        ship.velocity = ship.jumpStrength;
-        jumpSound.play();
-        sessionJumps++;
-        event.preventDefault(); // Prevent ghost clicks and delay
-      }
-    }, { passive: false });
-
-    // =====================
-    // Start
+    // Start Everything
     // =====================
     gameLoop();
-    showMenu();
+    showMenuScreen();
   </script>
 </body>
 </html>

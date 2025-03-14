@@ -223,9 +223,9 @@
     // Obstacle Settings
     // =====================
     const obstacleWidth = 80;
-    let baseObstacleGap = 200;
+    let baseObstacleGap = 150;
     let baseObstacleSpeed = 6.0;
-    let obstacleInterval = 2100; // ms between obstacles
+    let obstacleInterval = 1500; // ms between obstacles
     let obstacles = [];
     let lastObstacleTime = Date.now() - obstacleInterval + 100;
     
@@ -240,8 +240,8 @@
         obstacleInterval = 1700;
       } else {
         baseObstacleSpeed = 6.0;
-        baseObstacleGap = 200;
-        obstacleInterval = 2100;
+        baseObstacleGap = 150;
+        obstacleInterval = 1500;
       }
     }
     updateSettingsBasedValues();

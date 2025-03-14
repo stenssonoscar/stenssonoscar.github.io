@@ -138,14 +138,14 @@
         margin: 0 auto;
       }
       .menuTitle {
-        font-size: 40px;
+        font-size: 30px;
       }
       .menuButton {
         margin: 10px;
-        font-size: 20px;
+        font-size: 15px;
       }
       .menuButton .icon {
-        font-size: 24px;
+        font-size: 15px;
       }
     }
   </style>
@@ -225,7 +225,7 @@
     const obstacleWidth = 80;
     let baseObstacleGap = 150;
     let baseObstacleSpeed = 6.0;
-    let obstacleInterval = 1500; // ms between obstacles
+    let obstacleInterval = 1000; // ms between obstacles
     let obstacles = [];
     let lastObstacleTime = Date.now() - obstacleInterval + 100;
     
@@ -233,7 +233,7 @@
       // Set base values based on speed setting.
       if (settings.speed === "slow") {
         baseObstacleSpeed = 3.0;
-        baseObstacleGap = 250;
+        baseObstacleGap = 200;
         obstacleInterval = 2500;
       } else if (settings.speed === "fast") {
         baseObstacleSpeed = 9.0;

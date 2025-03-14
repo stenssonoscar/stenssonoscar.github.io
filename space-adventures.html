@@ -232,17 +232,17 @@
     function updateSettingsBasedValues() {
       // Set base values based on speed setting.
       if (settings.speed === "slow") {
-        baseObstacleSpeed = 3.0;
+        baseObstacleSpeed = 4;
         baseObstacleGap = 200;
-        obstacleInterval = 1000;
+        obstacleInterval = 1700;
       } else if (settings.speed === "fast") {
-        baseObstacleSpeed = 9.0;
+        baseObstacleSpeed = 9;
         baseObstacleGap = 150;
-        obstacleInterval = 1000;
+        obstacleInterval = 1200;
       } else {
-        baseObstacleSpeed = 6.0;
-        baseObstacleGap = 150;
-        obstacleInterval = 1000;
+        baseObstacleSpeed = 6;
+        baseObstacleGap = 200;
+        obstacleInterval = 1500;
       }
 
       // Adjust further for mobile devices (e.g., width less than 600px)

@@ -244,14 +244,6 @@
         baseObstacleGap = 200;
         obstacleInterval = 1500;
       }
-
-      // Adjust further for mobile devices (e.g., width less than 600px)
-      if (window.innerWidth < 600) {
-        // Slow down obstacles and give more gap/time to react on mobile.
-        baseObstacleSpeed *= 0.8;      // Reduce speed by 20%
-        baseObstacleGap *= 1.2;        // Increase vertical gap by 20%
-        obstacleInterval += 500;       // Increase spawn interval by 500ms
-      }
     }
     updateSettingsBasedValues();
     
@@ -350,7 +342,7 @@
     function createObstacle(dynamicGap) {
       const gapY = Math.floor(Math.random() * (canvas.height - dynamicGap - 100)) + 50;
       const topObs = {
-        x: canvas.width,
+        x: canvas.width * 0.90,
         y: 0,
         width: obstacleWidth,
         height: gapY

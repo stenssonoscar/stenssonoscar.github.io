@@ -222,27 +222,27 @@
     // =====================
     // Obstacle Settings
     // =====================
-    const obstacleWidth = 60;
+    const obstacleWidth = 80;
     let baseObstacleGap = 150;
     let baseObstacleSpeed = 6.0;
-    let obstacleInterval = 1000; // ms between obstacles
+    let obstacleInterval = 2100; // ms between obstacles
     let obstacles = [];
-    let lastObstacleTime = Date.now() - obstacleInterval + 100;
+    let lastObstacleTime = Date.now() - obstacleInterval + 50;
     
     function updateSettingsBasedValues() {
       // Set base values based on speed setting.
       if (settings.speed === "slow") {
-        baseObstacleSpeed = 4;
+        baseObstacleSpeed = 3;
         baseObstacleGap = 200;
-        obstacleInterval = 1500;
+        obstacleInterval = 1700;
       } else if (settings.speed === "fast") {
         baseObstacleSpeed = 9;
         baseObstacleGap = 150;
-        obstacleInterval = 1000;
+        obstacleInterval = 1200;
       } else {
-        baseObstacleSpeed = 6;
+        baseObstacleSpeed = 5;
         baseObstacleGap = 200;
-        obstacleInterval = 1900;
+        obstacleInterval = 1500;
       }
 
       // Adjust further for mobile devices (e.g., width less than 600px)

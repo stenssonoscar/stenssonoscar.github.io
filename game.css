@@ -1,0 +1,302 @@
+/* ===================================================================
+ * SPACE ADVENTURES - GAME.CSS
+ * Main stylesheet for the Space Adventures game
+ * =================================================================== */
+
+/* ===================================================================
+ * 1. GENERAL STYLES
+ * =================================================================== */
+ body {
+    margin: 0;
+    overflow: hidden;
+    background: #111;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  
+  /* ===================================================================
+   * 2. GAME CONTAINER
+   * =================================================================== */
+  #gameContainer {
+    position: relative;
+    width: 90vw;
+    height: 90vh;
+    border: 15px solid #fff;
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    background: #000;
+  }
+  
+  /* Canvas styling */
+  #gameCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  
+  /* ===================================================================
+   * 3. SCOREBOARD & STATUS ELEMENTS
+   * =================================================================== */
+  #scoreboard {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 28px;
+    color: #fff;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+  }
+  
+  /* Score multiplier active state */
+  #scoreboard.boosted {
+    color: #FFFF00;
+    background: rgba(20, 0, 40, 0.8);
+    box-shadow: 0 0 15px rgba(255, 255, 0, 0.4);
+  }
+  
+  /* Status indicators for power-ups and timers */
+  .statusIndicator {
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+    padding: 3px 8px;
+    margin-bottom: 5px;
+    font-size: 14px;
+    display: inline-block;
+  }
+  
+  /* ===================================================================
+   * 4. MENU OVERLAY
+   * =================================================================== */
+  #menuOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    color: #fff;
+  }
+  
+  #menuContent {
+    position: relative;
+    text-align: center;
+    width: 600px;
+    max-width: 90%;
+    padding: 30px;
+    border: 3px solid #fff;
+    border-radius: 15px;
+    background: radial-gradient(circle at 50% 110%, #223 30%, #003 70%, #001 100%);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+    animation: fadeIn 0.5s ease-out;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
+  /* ===================================================================
+   * 5. MENU ELEMENTS
+   * =================================================================== */
+  /* Large stylized title */
+  .menuTitle {
+    font-size: 50px;
+    margin: 0;
+    margin-bottom: 20px;
+    color: #9a9ae1;
+    text-shadow: 2px 2px 0 #000, 4px 4px 0 #666;
+    letter-spacing: 2px;
+  }
+  
+  /* Big "cartoon" buttons */
+  .menuButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    background-image: linear-gradient(to right top, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+    text-shadow: 2px 2px 0 #000;
+  }
+  
+  .menuButton:hover {
+    background: #69bff8;
+    transform: scale(1.05);
+  }
+  
+  /* Class for icons inside the button */
+  .menuButton .icon {
+    font-size: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  
+  /* Inputs for profile selection, settings, etc. */
+  .inputField, .selectField {
+    display: block;
+    width: 80%;
+    margin: 10px auto;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  
+  /* ===================================================================
+   * 6. MISSION PANEL & PROGRESSION UI
+   * =================================================================== */
+  /* Mission panel styling */
+  .missionPanel {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #FFF;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .missionBar {
+    height: 4px;
+    background: #333;
+    margin-top: 5px;
+    border-radius: 2px;
+  }
+  
+  .missionProgress {
+    height: 4px;
+    background: #69bff8;
+    border-radius: 2px;
+  }
+  
+  .missionComplete {
+    background: #8F8;
+  }
+  
+  /* Rank badge styling */
+  .rankBadge {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    padding: 5px 15px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  /* Mission list styling */
+  .missionsList {
+    text-align: left;
+  }
+  
+  .missionsList ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  .missionsList li {
+    padding: 8px 0;
+    border-bottom: 1px solid #444;
+  }
+  
+  .missionsList li:last-child {
+    border-bottom: none;
+  }
+  
+  /* Toggle switch for settings */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    vertical-align: middle;
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #555;
+    transition: .4s;
+    border-radius: 30px;
+  }
+  
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .toggle-slider {
+    background-color: #2196F3;
+  }
+  
+  input:checked + .toggle-slider:before {
+    transform: translateX(30px);
+  }
+  
+  /* ===================================================================
+   * 7. RESPONSIVE MOBILE STYLES
+   * =================================================================== */
+  @media (max-width: 600px) {
+    #gameContainer {
+      width: 100vw;
+      height: 100vh;
+      border: 0;
+      border-radius: 0;
+    }
+    
+    #menuContent {
+      width: 90%;
+      margin: 0 auto;
+    }
+    
+    .menuTitle {
+      font-size: 30px;
+    }
+    
+    .menuButton {
+      margin: 10px;
+      font-size: 15px;
+    }
+    
+    .menuButton .icon {
+      font-size: 15px;
+    }
+  }

@@ -5,26 +5,25 @@
   <!-- Import Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <!-- Ensures better mobile scaling -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Space Adventures</title>
   <link rel="stylesheet" href="game.css">
 </head>
 <body>
-  <!-- Game container with a fancy frame -->
+  <!-- Game container -->
   <div id="gameContainer">
     <canvas id="gameCanvas"></canvas>
     <div id="scoreboard">Score: 0</div>
   </div>
-
+  
   <!-- Menu / Overlay -->
   <div id="menuOverlay">
     <div id="menuContent">
       <!-- The contents of this div will be dynamically replaced by JS -->
     </div>
   </div>
-
+  
   <!-- Load JavaScript file -->
   <script src="game.js"></script>
 </body>
 </html>
-

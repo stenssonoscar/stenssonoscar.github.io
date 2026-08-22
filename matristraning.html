@@ -200,14 +200,15 @@
   <div class="card">
     <span class="eyebrow">Övning · abstrakt resonemang</span>
     <h1>Träna i samma flöde som skarpa testet</h1>
-    <p>2 övningsuppgifter, sedan 20 skarpa. Markera ett av sex alternativ och skicka, 2 minuter per uppgift, adaptiv svårighetsgrad 1–8. Mönster enbart längs rader och kolumner.</p>
+    <p>2 övningsuppgifter, sedan 20 skarpa. Markera ett av sex alternativ och skicka, 2 minuter per uppgift, adaptiv svårighetsgrad 1–10. Mönster enbart längs rader och kolumner.</p>
     <h3>Strukturer i stigande svårighet</h3>
     <ul class="taxo">
       <li><b>RM</b><span>Regelmatriser<em>Form, antal, fyllnadsgrad, storlek, pekare – 1 till 4 regler samtidigt, inklusive fördelning av två.</em></span></li>
       <li><b>RE</b><span>Remsa<em>Fylld ruta som vandrar i en fyrdelad remsa, med pilar som följer sin egen fördelning.</em></span></li>
       <li><b>AR</b><span>Prickar med tecken<em>Ovanför linjen plus, nedanför minus – tredje rutan är summan.</em></span></li>
       <li><b>FB</b><span>Frekvensbalans<em>Totalen av vågräta och lodräta streck är konstant i varje rad och kolumn – svaret är det som fattas.</em></span></li>
-      <li><b>KV</b><span>Rörelse<em>Två eller tre markörer vandrar var för sig runt ett kors – de kan täcka varandra eller saknas.</em></span></li>
+      <li><b>KV</b><span>Rörelse<em>Två eller tre symboler vandrar var för sig runt ett kors eller ett X – de kan täcka varandra eller saknas.</em></span></li>
+      <li><b>TR</b><span>Trippel<em>Tre tecken i följd där varje position följer sin egen regel – och spegelvända streck räknas som olika tecken.</em></span></li>
       <li><b>ÖL</b><span>Överlagring<em>Två rutor läggs ihop; gemensamma delar försvinner. Nu även med ramar och diagonaler.</em></span></li>
       <li><b>AK</b><span>Ackumulation<em>En figur läggs till per steg – de kan hamna ovanpå varandra.</em></span></li>
       <li><b>RO</b><span>Roterande mönster<em>Kulring eller sektorhjul som roterar nedåt medan antalet ändras åt höger.</em></span></li>
@@ -534,22 +535,56 @@
     return svgWrap(out,false);
   }
   function quadSVG(d){
-    var out='<line x1="16" y1="52" x2="88" y2="52" stroke="'+FIG+'" stroke-width="2"/>'+
-            '<line x1="52" y1="16" x2="52" y2="88" stroke="'+FIG+'" stroke-width="2"/>';
+    var out='',isX=(d.ch==='x');
+    if(isX){
+      out+='<line x1="22" y1="22" x2="78" y2="78" stroke="'+FIG+'" stroke-width="2.4" stroke-linecap="round"/>'+
+           '<line x1="22" y1="78" x2="78" y2="22" stroke="'+FIG+'" stroke-width="2.4" stroke-linecap="round"/>';
+    }else{
+      out+='<line x1="16" y1="52" x2="88" y2="52" stroke="'+FIG+'" stroke-width="2"/>'+
+           '<line x1="52" y1="16" x2="52" y2="88" stroke="'+FIG+'" stroke-width="2"/>';
+    }
+    var P=isX?[{x:50,y:23},{x:77,y:50},{x:50,y:77},{x:23,y:50}]:QUAD;
     var occ=[[],[],[],[]];
-    if(d.a!==null&&d.a!==undefined) occ[d.a].push('dot');
-    if(d.b!==null&&d.b!==undefined) occ[d.b].push('plus');
-    if(d.t!==null&&d.t!==undefined) occ[d.t].push('tri');
+    if(d.a!==null&&d.a!==undefined) occ[d.a].push(0);
+    if(d.b!==null&&d.b!==undefined) occ[d.b].push(1);
+    if(d.t!==null&&d.t!==undefined) occ[d.t].push(2);
+    function glyph(kind,x,y){
+      if(isX){
+        if(kind===0) return '<circle cx="'+x+'" cy="'+y+'" r="6" fill="none" stroke="'+FIG+'" stroke-width="2.2"/>';
+        if(kind===1) return starPath(x,y,7.5);
+        return '<polygon points="'+poly(4,-90,x,y,6.5)+'" fill="none" stroke="'+FIG+'" stroke-width="2.2" stroke-linejoin="round"/>';
+      }
+      if(kind===0) return '<circle cx="'+x+'" cy="'+y+'" r="5.2" fill="'+FIG+'"/>';
+      if(kind===1) return '<line x1="'+(x-5.5)+'" y1="'+y+'" x2="'+(x+5.5)+'" y2="'+y+'" stroke="'+FIG+'" stroke-width="2.8" stroke-linecap="round"/>'+
+                          '<line x1="'+x+'" y1="'+(y-5.5)+'" x2="'+x+'" y2="'+(y+5.5)+'" stroke="'+FIG+'" stroke-width="2.8" stroke-linecap="round"/>';
+      return '<polygon points="'+poly(3,-90,x,y,6.4)+'" fill="none" stroke="'+FIG+'" stroke-width="2.2" stroke-linejoin="round"/>';
+    }
     for(var q=0;q<4;q++){
       var list=occ[q];
       for(var i=0;i<list.length;i++){
-        var base=QUAD[q];
-        var x=base.x+(i-(list.length-1)/2)*14, y=base.y;
-        if(list[i]==='dot') out+='<circle cx="'+x+'" cy="'+y+'" r="5.2" fill="'+FIG+'"/>';
-        else if(list[i]==='plus')
-          out+='<line x1="'+(x-5.5)+'" y1="'+y+'" x2="'+(x+5.5)+'" y2="'+y+'" stroke="'+FIG+'" stroke-width="2.8" stroke-linecap="round"/>'+
-               '<line x1="'+x+'" y1="'+(y-5.5)+'" x2="'+x+'" y2="'+(y+5.5)+'" stroke="'+FIG+'" stroke-width="2.8" stroke-linecap="round"/>';
-        else out+='<polygon points="'+poly(3,-90,x,y,6.4)+'" fill="none" stroke="'+FIG+'" stroke-width="2.2" stroke-linejoin="round"/>';
+        var base=P[q];
+        out+=glyph(list[i],base.x+(i-(list.length-1)/2)*15,base.y);
+      }
+    }
+    return svgWrap(out,false);
+  }
+  function starPath(cx,cy,r){
+    var pts=[];
+    for(var i=0;i<10;i++){
+      var a=(-90+i*36)*Math.PI/180, rr=(i%2===0)?r:r*.45;
+      pts.push((cx+rr*Math.cos(a)).toFixed(2)+','+(cy+rr*Math.sin(a)).toFixed(2));
+    }
+    return '<polygon points="'+pts.join(' ')+'" fill="none" stroke="'+FIG+'" stroke-width="1.8" stroke-linejoin="round"/>';
+  }
+  function tripSVG(d){
+    var out='',xs=[26,50,74];
+    for(var i=0;i<3;i++){
+      var g=d.g[i],x=xs[i];
+      if(g==='D') out+='<polygon points="'+poly(4,-90,x,50,8)+'" fill="'+FIG+'"/>';
+      else{
+        out+='<line x1="'+x+'" y1="34" x2="'+x+'" y2="66" stroke="'+FIG+'" stroke-width="3.4" stroke-linecap="round"/>';
+        var nx=(g==='L')?x-7:x+7;
+        out+='<line x1="'+x+'" y1="50" x2="'+nx+'" y2="50" stroke="'+FIG+'" stroke-width="3.4" stroke-linecap="round"/>';
       }
     }
     return svgWrap(out,false);
@@ -593,6 +628,7 @@
     if(d.k==='acc') return accSVG(d);
     if(d.k==='sign') return signSVG(d);
     if(d.k==='quad') return quadSVG(d);
+    if(d.k==='trip') return tripSVG(d);
     if(d.k==='freq') return freqSVG(d);
     if(d.k==='strip') return stripSVG(d);
     return attrSVG(d);
@@ -608,7 +644,8 @@
                            '|'+d.sA+d.sB+'|'+(d.noDot?1:0);
     if(d.k==='sign') return 'D|'+d.v;
     if(d.k==='quad') return 'Q|'+(d.a===null?'x':d.a)+'|'+(d.b===null?'x':d.b)+'|'+
-                            (d.t===null||d.t===undefined?'x':d.t);
+                            (d.t===null||d.t===undefined?'x':d.t)+'|'+(d.ch||'c');
+    if(d.k==='trip') return 'T|'+d.g.join('');
     if(d.k==='freq') return 'F|'+d.h+'|'+d.v;
     if(d.k==='strip') return 'R|'+d.f+'|'+(d.arrow||'x');
     return attrKey(d);
@@ -665,7 +702,9 @@
     5:{n:3,fams:['KR','PP','F3'],require:'F3'},
     6:{n:3,fams:['KR','PP','F3','F2'],require:'F3'},
     7:{n:4,fams:['KR','PP','F3','F2'],require:'F2'},
-    8:{n:4,fams:['PP','F3','F2'],require:'F2'}
+    8:{n:4,fams:['PP','F3','F2'],require:'F2'},
+    9:{n:5,fams:['PP','F3','F2'],require:'F2'},
+    10:{n:5,fams:['PP','F3','F2'],require:'F2'}
   };
   function idxOptionsFor(attr,fams){
     var o=[];
@@ -752,7 +791,7 @@
           });
         })(used[i]);
       }
-      var built=assemble(answer,pools,(level>=7)?[['ic',3],['rep',1],['wp',1]]:[['rep',1],['ic',2],['wp',1],['md',1]]);
+      var built=assemble(answer,pools,(level>=9)?[['ic',4],['rep',1]]:(level>=7)?[['ic',3],['rep',1],['wp',1]]:[['rep',1],['ic',2],['wp',1],['md',1]]);
       if(!built) continue;
 
       var lines=used.map(function(a){
@@ -946,6 +985,7 @@
     for(var t=0;t<700;t++){
       var three=(level>=7);
       var useF2=!three&&((level>=6)||(level>=5&&Math.random()<.35));
+      var ch=pick(['c','x']);
       var sa=pick([1,3]),sb=pick([1,3]),a0=rnd(4),b0=rnd(4),t0=rnd(4);
       var f2vals=null,dd=null;
       if(useF2){
@@ -955,7 +995,7 @@
       }
       var grid=[[],[],[]],r,c;
       for(r=0;r<3;r++) for(c=0;c<3;c++){
-        var cell={k:'quad', a:(a0+c*sa)%4,
+        var cell={k:'quad', ch:ch, a:(a0+c*sa)%4,
                   b:useF2?f2vals[IDX[dd](r,c)]:(b0+r*sb)%4,
                   t:three?((t0+c*(4-sa))%4):null};
         grid[r].push(cell);
@@ -964,36 +1004,38 @@
 
       var answer=grid[2][2];
       var pools={rep:neighbourPool(grid,answer),mx:matrixPool(grid,answer),wp:[],ic:[],md:[]};
-      pools.wp.push({k:'quad',a:(answer.a+2)%4,b:answer.b,t:answer.t});
-      if(answer.b!==null) pools.wp.push({k:'quad',a:answer.b,b:answer.a,t:answer.t});
+      pools.wp.push({k:'quad',ch:ch,a:(answer.a+2)%4,b:answer.b,t:answer.t});
+      if(answer.b!==null) pools.wp.push({k:'quad',ch:ch,a:answer.b,b:answer.a,t:answer.t});
       [1,3].forEach(function(s){
-        pools.ic.push({k:'quad',a:(answer.a+s)%4,b:answer.b,t:answer.t});
-        if(answer.b!==null) pools.md.push({k:'quad',a:answer.a,b:(answer.b+s)%4,t:answer.t});
-        if(answer.t!==null&&answer.t!==undefined) pools.ic.push({k:'quad',a:answer.a,b:answer.b,t:(answer.t+s)%4});
+        pools.ic.push({k:'quad',ch:ch,a:(answer.a+s)%4,b:answer.b,t:answer.t});
+        if(answer.b!==null) pools.md.push({k:'quad',ch:ch,a:answer.a,b:(answer.b+s)%4,t:answer.t});
+        if(answer.t!==null&&answer.t!==undefined) pools.ic.push({k:'quad',ch:ch,a:answer.a,b:answer.b,t:(answer.t+s)%4});
       });
-      if(answer.b!==null&&!three) pools.ic.push({k:'quad',a:answer.a,b:null,t:answer.t});
+      if(answer.b!==null&&!three) pools.ic.push({k:'quad',ch:ch,a:answer.a,b:null,t:answer.t});
       if(useF2&&answer.b===null&&f2vals) f2vals.forEach(function(v){
-        if(v!==null) pools.ic.push({k:'quad',a:answer.a,b:v,t:answer.t});
+        if(v!==null) pools.ic.push({k:'quad',ch:ch,a:answer.a,b:v,t:answer.t});
       });
 
       var built=assemble(answer,pools,[['wp',1],['rep',1],['ic',2],['md',1]]);
       if(!built) continue;
 
-      var lines=[{tag:'KV',text:'Pricken flyttar en kvadrant '+(sa===1?'medurs':'moturs')+
-        ' för varje ruta åt höger och står stilla nedåt i kolumnen.'}];
+      var NM=(ch==='x')?['Cirkeln','Stjärnan','Romben']:['Pricken','Plustecknet','Triangeln'];
+      var PL=(ch==='x')?'fickorna runt X:et':'kvadranterna';
+      var lines=[{tag:'KV',text:NM[0]+' flyttar ett steg '+(sa===1?'medurs':'moturs')+
+        ' i '+PL+' för varje ruta åt höger och står stilla nedåt i kolumnen.'}];
       var fams=['KV'];
       if(useF2){
-        lines.push({tag:'F2',text:'Plustecknet följer fördelning av två: i varje rad och varje kolumn finns det i två rutor och saknas helt i den tredje, och det växlar mellan två bestämda kvadranter.'});
+        lines.push({tag:'F2',text:NM[1]+' följer fördelning av två: i varje rad och varje kolumn finns det i två rutor och saknas helt i den tredje, och det växlar mellan två bestämda lägen.'});
         fams.push('F2');
       }else{
-        lines.push({tag:'KV',text:'Plustecknet flyttar en kvadrant '+(sb===1?'medurs':'moturs')+
+        lines.push({tag:'KV',text:NM[1]+' flyttar ett steg '+(sb===1?'medurs':'moturs')+
           ' för varje rad nedåt och står stilla i raden.'});
       }
       if(three){
-        lines.push({tag:'KV',text:'Triangeln flyttar en kvadrant '+(sa===1?'moturs':'medurs')+
-          ' för varje ruta åt höger – alltså åt motsatt håll mot pricken.'});
+        lines.push({tag:'KV',text:NM[2]+' flyttar ett steg '+(sa===1?'moturs':'medurs')+
+          ' för varje ruta åt höger – alltså åt motsatt håll mot '+NM[0].toLowerCase()+'.'});
       }
-      lines.push({tag:'—',text:'Följ varje markör för sig – de rör sig oberoende och kan hamna i samma kvadrant.',note:true});
+      lines.push({tag:'—',text:'Följ varje symbol för sig – de rör sig oberoende och kan hamna på samma plats.',note:true});
       return {grid:grid,answer:answer,options:built.options,traps:built.traps,
               lines:lines,fams:fams,nrules:three?3:2,level:level,struct:'Rörelse'};
     }
@@ -1143,6 +1185,68 @@
     return null;
   }
 
+  /* ================= motor: trippel ================= */
+  function genTrip(level){
+    var TYPES=['D','L','R'];
+    for(var t=0;t<700;t++){
+      var slots=[],taken={},i;
+      for(i=0;i<3;i++){
+        var opts=['r','c','d1','d2'].filter(function(k){return !taken[k];});
+        var idx=pick(opts); taken[idx]=1;
+        slots.push({idx:idx,vals:shuffle(TYPES.slice())});
+      }
+      var anyCol=false,anyRow=false;
+      for(i=0;i<3;i++){ if(COLVARY[slots[i].idx])anyCol=true; if(ROWVARY[slots[i].idx])anyRow=true; }
+      if(!anyCol||!anyRow) continue;
+
+      var grid=[[],[],[]],r,c;
+      for(r=0;r<3;r++) for(c=0;c<3;c++){
+        var g=[];
+        for(i=0;i<3;i++) g.push(slots[i].vals[IDX[slots[i].idx](r,c)]);
+        grid[r].push({k:'trip',g:g});
+      }
+      if(distinctCount(grid)<8) continue;
+
+      var answer=grid[2][2],key=cellKey(answer);
+      var pools={rep:neighbourPool(grid,answer),mx:matrixPool(grid,answer),wp:[],ic:[],md:[]};
+      [[0,1],[1,2],[0,2]].forEach(function(pr){
+        var g2=answer.g.slice(); var tmp=g2[pr[0]]; g2[pr[0]]=g2[pr[1]]; g2[pr[1]]=tmp;
+        var o={k:'trip',g:g2};
+        if(cellKey(o)!==key) pools.wp.push(o);
+      });
+      for(i=0;i<3;i++){
+        if(answer.g[i]==='L'||answer.g[i]==='R'){
+          var g3=answer.g.slice(); g3[i]=(g3[i]==='L')?'R':'L';
+          pools.ic.push({k:'trip',g:g3});
+        }
+      }
+      for(i=0;i<3;i++){
+        TYPES.forEach(function(tp){
+          if(tp===answer.g[i]) return;
+          var g4=answer.g.slice(); g4[i]=tp;
+          var o={k:'trip',g:g4};
+          if(cellKey(o)!==key) pools.md.push(o);
+        });
+      }
+      var built=assemble(answer,pools,[['wp',1],['ic',2],['rep',1],['md',1]]);
+      if(!built) continue;
+
+      var POSN=['Första tecknet','Mittentecknet','Sista tecknet'];
+      var lines=slots.map(function(s2,j){
+        var txt;
+        if(DIST[s2.idx]) txt=POSN[j]+' följer fördelning av tre: romb, vänsterpigg och högerpigg förekommer var sin gång per rad och kolumn på just den positionen.';
+        else if(s2.idx==='r') txt=POSN[j]+' är samma i hela raden och byts mellan raderna.';
+        else txt=POSN[j]+' är samma i hela kolumnen och byts mellan kolumnerna.';
+        return {tag:DIST[s2.idx]?'F3':'KR',text:txt};
+      });
+      lines.push({tag:'—',text:'Spegelvända streck räknas som olika tecken: piggen åt vänster och piggen åt höger är två skilda värden. Ordningen inom trippeln är en del av svaret – flera felalternativ är bara omkastningar.',note:true});
+      var fams=[]; slots.forEach(function(s2){var f=DIST[s2.idx]?'F3':'KR'; if(fams.indexOf(f)<0)fams.push(f);});
+      return {grid:grid,answer:answer,options:built.options,traps:built.traps,
+              lines:lines,fams:fams,nrules:3,level:level,struct:'Trippel'};
+    }
+    return null;
+  }
+
   /* ================= förklaringar ================= */
   function explain(attr,spec){
     var L=ATTRS[attr].label,idx=spec.idx,ord=ATTRS[attr].ordered;
@@ -1193,19 +1297,21 @@
   /* ================= val av motor ================= */
   function generate(level){
     var order,i,p;
-    if(level>=7)      order=['neck','clock','sign','quad','freq','overlay','strip','acc'];
-    else if(level>=6) order=['clock','sign','quad','freq','neck','overlay','strip','acc'];
-    else if(level>=5) order=['overlay','sign','quad','freq','strip','acc','clock','transform'];
-    else if(level>=4) order=['acc','sign','freq','strip','transform','transform'];
+    if(level>=9)      order=['clock','sign','quad','trip','freq','neck','overlay','transform'];
+    else if(level>=7) order=['neck','clock','sign','quad','trip','freq','overlay','strip','acc'];
+    else if(level>=6) order=['clock','sign','quad','trip','freq','neck','overlay','strip','acc'];
+    else if(level>=5) order=['overlay','sign','quad','trip','freq','strip','acc','clock','transform'];
+    else if(level>=4) order=['acc','sign','freq','strip','trip','transform','transform'];
     else if(level>=3) order=['strip','transform','transform','transform'];
     else              order=['transform'];
-    var tries=[pick(order),'transform','overlay','sign','quad','freq','strip','acc','clock','neck'];
+    var tries=[pick(order),'transform','overlay','sign','quad','trip','freq','strip','acc','clock','neck'];
     for(i=0;i<tries.length;i++){
       var g=tries[i];
       if(g==='transform') p=genTransform(level);
       else if(g==='overlay') p=genOverlay(level);
       else if(g==='sign') p=genSign(level);
       else if(g==='quad') p=genQuad(level);
+      else if(g==='trip') p=genTrip(level);
       else if(g==='freq') p=genFreq(level);
       else if(g==='strip') p=genStrip(level);
       else if(g==='acc') p=genAccumulate(level);
@@ -1333,7 +1439,7 @@
         S.famStat[f].n++; if(right) S.famStat[f].r++;
       });
     }
-    S.level=Math.max(1,Math.min(8,S.level+(right?1:-1)));
+    S.level=Math.max(1,Math.min(10,S.level+(right?1:-1)));
     S.maxLevel=Math.max(S.maxLevel,S.level);
 
     if(S.mode==='test'&&!isWarmup()){
@@ -1380,7 +1486,8 @@
     stopTimer();
     var log=S.levelLog.slice(-10),theta=1,i;
     if(log.length){ var s=0; log.forEach(function(l){s+=l;}); theta=s/log.length; }
-    var score=Math.max(1,Math.min(10,Math.round(theta*1.25)));
+    var score=Math.max(1,Math.min(10,Math.round(theta)));
+    var atCeiling=(S.maxLevel>=10&&theta>=9.5);
     var band=BANDS[BANDS.length-1];
     for(i=0;i<BANDS.length;i++) if(score<=BANDS[i][0]){ band=BANDS[i]; break; }
     $('e-score').textContent=score;
@@ -1405,8 +1512,9 @@
     var pct=S.levelLog.length?Math.round(100*S.correct/S.levelLog.length):0;
     var note;
     if(S.levelLog.length<5) note='För kort pass för att säga något. Kör hela omgången på 20 uppgifter.';
+    else if(atCeiling) note='Du nådde taket: nivå 10 med nästan allt rätt. Uppgifterna tog slut innan du gjorde det – ditt faktiska tak ligger sannolikt högre än vad den här skalan kan mäta.';
     else if(weakest&&weakVal<.45) note='Din svagaste typ är '+FAM[weakest].toLowerCase()+'. Granska de uppgifterna nedan och kör sedan ett pass i övningsläge.';
-    else if(pct>=75) note='Hög andel rätt betyder att nivån inte hann klättra tillräckligt. Kör ett pass till – det är strukturerna på nivå 6–8 som avgör poängen.';
+    else if(pct>=75) note='Hög andel rätt och nivå kvar att klättra – kör ett pass till och låt nivån hitta din gräns.';
     else if(pct>=40) note='Det här ser kalibrerat ut: du löser ungefär hälften och ligger nära din gräns. Precis så ska ett adaptivt test kännas.';
     else note='Nivån hamnade för högt för snabbt. Kör ett pass i övningsläge och läs regelförklaringarna innan nästa testläge.';
     $('endnote').textContent=note;

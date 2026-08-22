@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matristräning – testläge i Alva-format</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  :root{
+    --bg:#f8fafc; --surface:#ffffff; --surface-2:#f1f5f9;
+    --ink:#0f172a; --muted:#64748b; --soft:#94a3b8;
+    --line:#e2e8f0; --line-soft:#eef2f6;
+    --accent:#3b82f6; --accent-dark:#2563eb; --tint:#eff6ff; --tintline:#bfdbfe;
+    --ok:#16a34a; --okbg:#f0fdf4; --bad:#dc2626; --badbg:#fef2f2; --warn:#d97706;
+    --fig:#0f172a;
+    --sans:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --shadow:0 1px 2px rgba(15,23,42,.05),0 4px 12px rgba(15,23,42,.06);
+    --shadow-hover:0 6px 18px rgba(59,130,246,.18);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;padding-bottom:56px}
+  .wrap{max-width:840px;margin:0 auto;padding:0 18px}
+
+  header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .headbar{max-width:840px;margin:0 auto;padding:14px 18px;display:flex;align-items:center;gap:14px}
+  .mark{font-weight:700;font-size:15px;letter-spacing:-.01em}
+  .mark b{color:var(--accent)}
+  .mark span{color:var(--muted);font-weight:500;font-size:13px}
+  .progress{margin-left:auto;font-size:13.5px;font-weight:600;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:5px 14px}
+  .progress .warm{color:var(--warn)}
+
+  main{padding-top:28px}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px 28px 24px;box-shadow:var(--shadow)}
+
+  .qtop{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .qtop .lead{font-size:15.5px;font-weight:600;letter-spacing:-.01em}
+  .timer{margin-left:auto;text-align:right}
+  .timer .t{font-size:19px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .timer.low .t{color:var(--warn)}
+  .tbar{height:3px;background:var(--line-soft);margin-top:6px;width:88px;margin-left:auto;overflow:hidden;border-radius:2px}
+  .tbar i{display:block;height:100%;background:var(--accent);width:100%;transform-origin:left;transition:transform 1s linear}
+  .timer.low .tbar i{background:var(--warn)}
+  .pausebtn{font-size:12.5px;font-weight:600;background:var(--surface);border:1px solid var(--line);border-radius:999px;color:var(--muted);padding:6px 14px;cursor:pointer;transition:all .15s}
+  .pausebtn:hover{color:var(--accent);border-color:var(--tintline);background:var(--tint)}
+  .focuswarn{font-size:12px;font-weight:500;color:var(--warn);height:17px;margin:-6px 0 10px;text-align:right}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:404px;margin:0 auto}
+  .cell{aspect-ratio:1;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .cell.missing{background:var(--surface-2);border:1.5px dashed var(--soft);color:var(--soft);font-size:28px;font-weight:600}
+  .cell svg{width:100%;height:100%;display:block}
+
+  .optlabel{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:26px 0 12px;text-align:center}
+  .opts{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;max-width:660px;margin:0 auto}
+  .opt{position:relative;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:0;cursor:pointer;aspect-ratio:1;display:flex;align-items:center;justify-content:center;transition:border-color .15s,box-shadow .15s,transform .15s;font:inherit;color:inherit;overflow:hidden}
+  .opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-3px);box-shadow:var(--shadow-hover)}
+  .opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .opt:disabled{cursor:default}
+  .opt svg{width:100%;height:100%}
+  .opt .key{position:absolute;top:4px;left:8px;font-size:10.5px;font-weight:600;color:var(--soft)}
+  .opt.sel{border-color:var(--accent);border-width:2px;background:var(--tint);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+  .opt.sel .key{color:var(--accent)}
+  .opt.correct{border-color:var(--ok);border-width:2px;background:var(--okbg)}
+  .opt.correct .key{color:var(--ok)}
+  .opt.wrong{border-color:var(--bad);border-width:2px;background:var(--badbg)}
+  .opt.wrong .key{color:var(--bad)}
+  .opt.dim{opacity:.4}
+  .trap{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:8px;font-weight:600;letter-spacing:.02em;color:var(--soft);text-transform:uppercase}
+
+  .submitrow{display:flex;justify-content:center;margin-top:18px}
+  .submit{font-family:var(--sans);font-size:14.5px;font-weight:600;background:var(--accent);color:#fff;border:none;border-radius:999px;padding:12px 52px;cursor:pointer;transition:background .15s,opacity .15s,box-shadow .15s;box-shadow:0 2px 8px rgba(59,130,246,.3)}
+  .submit:disabled{opacity:.35;cursor:default;box-shadow:none}
+  .submit:hover:not(:disabled){background:var(--accent-dark)}
+
+  .fb{margin-top:22px;border-top:1px solid var(--line-soft);padding-top:18px}
+  .fb[hidden]{display:none}
+  .verdict{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .verdict.ok{color:var(--ok)}
+  .verdict.no{color:var(--bad)}
+  .famline{font-size:12.5px;font-weight:500;color:var(--muted);margin-bottom:14px}
+  .rules{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+  .rules li{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.5}
+  .rules .tag{flex:none;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--accent-dark);border:1px solid var(--tintline);border-radius:6px;padding:3px 7px;margin-top:1px;background:var(--tint);min-width:36px;text-align:center}
+  .rules li.note{color:var(--muted);font-size:13.5px}
+  .rules li.note .tag{color:var(--soft);background:var(--surface-2);border-color:var(--line)}
+  .misread{margin-top:15px;padding:12px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;font-size:13.5px;line-height:1.5}
+  .misread b{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--warn);display:block;margin-bottom:3px}
+  .fbactions{display:flex;gap:10px;margin-top:20px;align-items:center;flex-wrap:wrap}
+
+  button.btn{font-family:var(--sans);font-size:14px;font-weight:600;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:11px 22px;cursor:pointer;transition:background .15s}
+  button.btn:hover{background:var(--accent-dark)}
+  button.ghost{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+  button.ghost:hover{background:var(--surface-2);color:var(--ink)}
+  .hint{font-size:12px;color:var(--soft);font-weight:500}
+
+  .veil{position:fixed;inset:0;background:rgba(248,250,252,.92);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20;overflow-y:auto}
+  .veil[hidden]{display:none}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:20px;max-width:560px;width:100%;padding:34px;margin:auto;box-shadow:0 10px 40px rgba(15,23,42,.1)}
+  .card .eyebrow{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-dark);background:var(--tint);border:1px solid var(--tintline);border-radius:999px;padding:5px 13px;margin-bottom:16px}
+  .card h1{font-size:26px;line-height:1.15;margin:0 0 12px;letter-spacing:-.02em;font-weight:700}
+  .card p{margin:0 0 14px;color:#334155;font-size:14.5px}
+  .card h3{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:20px 0 4px}
+  .taxo{margin:0 0 4px;padding:0;list-style:none;font-size:13.5px;color:#334155}
+  .taxo li{display:flex;gap:11px;padding:8px 0;border-top:1px solid var(--line-soft);align-items:baseline}
+  .taxo b{font-size:10.5px;font-weight:700;flex:none;width:28px;color:var(--accent-dark)}
+  .taxo em{font-style:normal;color:var(--muted);font-size:12.5px;display:block}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 8px}
+  .mode{border:1.5px solid var(--line);border-radius:12px;padding:15px;cursor:pointer;background:var(--surface);text-align:left;font:inherit;color:inherit;transition:all .15s}
+  .mode b{display:block;font-size:14.5px;margin-bottom:4px;font-weight:600}
+  .mode span{font-size:12.5px;color:var(--muted);line-height:1.5;display:block}
+  .mode.sel{border-color:var(--accent);background:var(--tint);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+  .mode.sel b{color:var(--accent-dark)}
+  .setting{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line-soft);font-size:14px}
+  .setting label{cursor:pointer;flex:1;font-weight:500}
+  .setting input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer}
+  .setting .sub{display:block;font-size:12.5px;color:var(--muted);margin-top:1px;font-weight:400}
+  .card .btn{width:100%;margin-top:16px;padding:13px;border-radius:12px;font-size:15px}
+  .card .btn.ghost{margin-top:8px}
+  .fine{font-size:12.5px;color:var(--muted)}
+
+  .scorebox{display:flex;align-items:baseline;gap:12px;border:1px solid var(--tintline);background:var(--tint);border-radius:14px;padding:18px 20px;margin:2px 0 16px}
+  .scorebox .big{font-size:42px;font-weight:700;line-height:.9;color:var(--accent-dark);font-variant-numeric:tabular-nums}
+  .scorebox .of{font-size:15px;color:var(--muted);font-weight:500}
+  .scorebox .band{margin-left:auto;text-align:right;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);line-height:1.7}
+  .scorebox .band b{display:block;color:var(--ink);font-size:12.5px}
+  .tally{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .tally div{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 8px;text-align:center}
+  .tally .v{font-size:21px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .tally .k{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+  .bars{margin:0 0 16px;padding:0;list-style:none}
+  .bars li{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:13px}
+  .bars .nm{flex:none;width:140px;font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+  .bars .track{flex:1;height:8px;background:var(--line-soft);border-radius:4px;overflow:hidden}
+  .bars .track i{display:block;height:100%;background:var(--accent);border-radius:4px}
+  .bars .val{flex:none;font-size:12px;font-weight:600;width:42px;text-align:right;font-variant-numeric:tabular-nums}
+
+  .revnav{display:flex;align-items:center;gap:10px;width:100%}
+  .revnav .pos{font-size:13px;color:var(--muted);font-weight:500}
+  .revnav .res{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  .revnav .res.ok{color:var(--ok)}
+  .revnav .res.no{color:var(--bad)}
+  .revnav .spacer{flex:1}
+  .pausecard{text-align:center}
+  .pausecard .t{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+
+  @media (max-width:680px){
+    .opts{grid-template-columns:repeat(3,1fr)}
+    .panel{padding:18px 16px;border-radius:14px}
+    .card{padding:26px 20px}
+    .modes{grid-template-columns:1fr}
+    .bars .nm{width:112px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="headbar">
+    <div class="mark">Matris<b>träning</b> <span id="modemark">· testläge</span></div>
+    <div class="progress" id="progress">–</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="panel" id="panel">
+    <div class="qtop">
+      <span class="lead" id="lead">Vilken ruta saknas?</span>
+      <button class="pausebtn" id="pause" type="button">Paus</button>
+      <div class="timer" id="timer">
+        <div class="t" id="tval">2:00</div>
+        <div class="tbar"><i id="tfill"></i></div>
+      </div>
+    </div>
+    <div class="focuswarn" id="focuswarn"></div>
+
+    <div class="grid" id="grid" role="group" aria-label="Matris med nio rutor där den sista saknas"></div>
+
+    <div class="optlabel">Markera ett alternativ och skicka</div>
+    <div class="opts" id="opts"></div>
+    <div class="submitrow" id="submitrow">
+      <button class="submit" id="submit" disabled>Skicka</button>
+    </div>
+
+    <div class="fb" id="fb" hidden>
+      <div class="verdict" id="verdict"></div>
+      <div class="famline" id="famline"></div>
+      <ul class="rules" id="rules"></ul>
+      <div class="misread" id="misread" hidden></div>
+      <div class="fbactions" id="fbactions">
+        <button class="btn" id="next">Nästa uppgift</button>
+        <button class="btn ghost" id="stop">Avsluta</button>
+        <span class="hint">Enter</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="veil" id="startveil">
+  <div class="card">
+    <span class="eyebrow">Övning · abstrakt resonemang</span>
+    <h1>Träna i samma flöde som skarpa testet</h1>
+    <p>2 övningsuppgifter, sedan 20 skarpa. Markera ett av sex alternativ och skicka, 2 minuter per uppgift, adaptiv svårighetsgrad 1–8. Mönster enbart längs rader och kolumner.</p>
+    <h3>Strukturer i stigande svårighet</h3>
+    <ul class="taxo">
+      <li><b>RM</b><span>Regelmatriser<em>Form, antal, fyllnadsgrad, storlek, pekare – 1 till 4 regler samtidigt, inklusive fördelning av två.</em></span></li>
+      <li><b>RE</b><span>Remsa<em>Fylld ruta som vandrar i en fyrdelad remsa, med pilar som följer sin egen fördelning.</em></span></li>
+      <li><b>AR</b><span>Prickar med tecken<em>Ovanför linjen plus, nedanför minus – tredje rutan är summan.</em></span></li>
+      <li><b>FB</b><span>Frekvensbalans<em>Totalen av vågräta och lodräta streck är konstant i varje rad och kolumn – svaret är det som fattas.</em></span></li>
+      <li><b>KV</b><span>Rörelse<em>Två eller tre markörer vandrar var för sig runt ett kors – de kan täcka varandra eller saknas.</em></span></li>
+      <li><b>ÖL</b><span>Överlagring<em>Två rutor läggs ihop; gemensamma delar försvinner. Nu även med ramar och diagonaler.</em></span></li>
+      <li><b>AK</b><span>Ackumulation<em>En figur läggs till per steg – de kan hamna ovanpå varandra.</em></span></li>
+      <li><b>RO</b><span>Roterande mönster<em>Kulring eller sektorhjul som roterar nedåt medan antalet ändras åt höger.</em></span></li>
+      <li><b>VI</b><span>Visare<em>Två visare i olika takt – på hög nivå lika långa, så bara rotationstakten skiljer dem åt.</em></span></li>
+    </ul>
+    <div class="modes" style="margin-top:16px">
+      <button class="mode sel" type="button" id="m-test">
+        <b>Testläge</b>
+        <span>Ingen återkoppling under passet, nästa uppgift direkt efter Skicka. Full genomgång efteråt.</span>
+      </button>
+      <button class="mode" type="button" id="m-practice">
+        <b>Övningsläge</b>
+        <span>Förklaring efter varje svar med regeltyp och felanalys.</span>
+      </button>
+    </div>
+    <div class="setting">
+      <input type="checkbox" id="opt-timer" checked>
+      <label for="opt-timer">Tidsgräns 2 minuter per uppgift
+        <span class="sub">Obesvarad uppgift räknas som fel, som i skarpa testet</span></label>
+    </div>
+    <button class="btn" id="begin">Starta</button>
+    <p class="fine" style="margin-top:14px">Lämnar du testfönstret visas en varning – i det skarpa testet loggas sådana händelser.</p>
+  </div>
+</div>
+
+<div class="veil" id="pauseveil" hidden>
+  <div class="card pausecard">
+    <div class="t">Pausad</div>
+    <p>Klockan för uppgiften är stoppad. I det skarpa testet kan du pausa på samma sätt.</p>
+    <button class="btn" id="resume">Fortsätt</button>
+  </div>
+</div>
+
+<div class="veil" id="endveil" hidden>
+  <div class="card">
+    <span class="eyebrow">Passet avslutat</span>
+    <h1>Resultat</h1>
+    <div class="scorebox">
+      <span class="big" id="e-score">–</span><span class="of">/ 10</span>
+      <span class="band"><b id="e-band">–</b><span id="e-pct">–</span></span>
+    </div>
+    <div class="tally">
+      <div><div class="v" id="e-c">0</div><div class="k">rätt</div></div>
+      <div><div class="v" id="e-n">0</div><div class="k">uppgifter</div></div>
+      <div><div class="v" id="e-l">1</div><div class="k">högsta nivå</div></div>
+    </div>
+    <ul class="bars" id="e-bars"></ul>
+    <p id="endnote"></p>
+    <p class="fine">Poängen viktar nivån du nådde tyngre än antalet rätt, som i ett adaptivt test. Den är inte normerad mot någon verklig population.</p>
+    <button class="btn" id="review">Granska alla uppgifter</button>
+    <button class="btn ghost" id="again">Nytt pass</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var FIG='#0f172a', PAPER='#ffffff';
+  var SHAPES=['circle','square','triangle','diamond','hexagon','pentagon','cross'];
+  var CLASH=[['circle','hexagon'],['circle','pentagon'],['hexagon','pentagon']];
+  var FILLS=['solid','hatch','open'];
+  var SIZES=[.72,.86,1];
+  var COUNTS=[1,2,3];
+  var ANGLES=[-90,30,150];
+  var SPOTS=[{x:50,y:31},{x:69,y:64},{x:31,y:64}];
+  var MARKS=['dot','bar','ring'];
+  var SLOT4=[{x:30,y:30},{x:70,y:30},{x:70,y:70},{x:30,y:70}];
+  var QUAD=[{x:65,y:37},{x:65,y:67},{x:35,y:67},{x:35,y:37}];
+  var patSeq=0;
+
+  function rnd(n){return Math.floor(Math.random()*n);}
+  function pick(a){return a[rnd(a.length)];}
+  function shuffle(a){for(var i=a.length-1;i>0;i--){var j=rnd(i+1);var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function clone(o){var n={};for(var k in o)n[k]=o[k];return n;}
+  function pickShapes(){
+    for(var t=0;t<200;t++){
+      var s=shuffle(SHAPES.slice()).slice(0,3),ok=true;
+      for(var i=0;i<CLASH.length;i++)
+        if(s.indexOf(CLASH[i][0])>-1&&s.indexOf(CLASH[i][1])>-1) ok=false;
+      if(ok) return s;
+    }
+    return ['circle','square','triangle'];
+  }
+
+  var ATTRS={
+    shape:{label:'Formen',ordered:false,nullable:false,values:pickShapes},
+    count:{label:'Antalet',ordered:true,nullable:false,values:function(){return COUNTS.slice();}},
+    size:{label:'Storleken',ordered:true,nullable:false,values:function(){return SIZES.slice();}},
+    fill:{label:'Fyllnaden',ordered:true,nullable:false,values:function(){return FILLS.slice();}},
+    rot:{label:'Pekaren',ordered:true,nullable:false,values:function(){return ANGLES.slice();}},
+    pos:{label:'Placeringen',ordered:true,nullable:false,values:function(){return SPOTS.slice();}},
+    mark:{label:'Innermärket',ordered:false,nullable:true,values:function(){return shuffle(MARKS.slice());}}
+  };
+  var IDX={
+    r:function(r,c){return r;}, rRev:function(r,c){return 2-r;},
+    c:function(r,c){return c;}, cRev:function(r,c){return 2-c;},
+    d1:function(r,c){return (r+c)%3;}, d2:function(r,c){return (r-c+3)%3;}
+  };
+  var COLVARY={c:1,cRev:1,d1:1,d2:1};
+  var ROWVARY={r:1,rRev:1,d1:1,d2:1};
+  var DIST={d1:1,d2:1};
+
+  var FAM={KR:'Konstant i rad',PP:'Parvis progression',F3:'Fördelning av tre',
+           F2:'Fördelning av två','ÖL':'Överlagring',AK:'Ackumulation',
+           RO:'Roterande mönster',VI:'Visare',AR:'Addition med tecken',
+           KV:'Rörelse',FB:'Frekvensbalans'};
+  function familyOf(attr,spec){
+    if(spec.nullSlot!==null&&spec.nullSlot!==undefined) return 'F2';
+    if(DIST[spec.idx]) return 'F3';
+    if(ATTRS[attr].ordered) return 'PP';
+    return 'KR';
+  }
+
+  /* ================= ritning ================= */
+  function poly(n,start,cx,cy,r){
+    var p=[];
+    for(var i=0;i<n;i++){
+      var a=(start+i*360/n)*Math.PI/180;
+      p.push((cx+r*Math.cos(a)).toFixed(2)+','+(cy+r*Math.sin(a)).toFixed(2));
+    }
+    return p.join(' ');
+  }
+  function ptAt(deg,r,cx,cy){
+    var a=deg*Math.PI/180;
+    return {x:cx+r*Math.cos(a),y:cy+r*Math.sin(a)};
+  }
+  function shapePath(shape,cx,cy,r,at){
+    if(shape==='circle')   return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r.toFixed(2)+'" '+at+'/>';
+    if(shape==='square')   return '<polygon points="'+poly(4,-45,cx,cy,r)+'" '+at+'/>';
+    if(shape==='diamond')  return '<polygon points="'+poly(4,-90,cx,cy,r)+'" '+at+'/>';
+    if(shape==='triangle') return '<polygon points="'+poly(3,-90,cx,cy,r*1.1)+'" '+at+'/>';
+    if(shape==='pentagon') return '<polygon points="'+poly(5,-90,cx,cy,r)+'" '+at+'/>';
+    if(shape==='hexagon')  return '<polygon points="'+poly(6,-90,cx,cy,r)+'" '+at+'/>';
+    if(shape==='cross'){
+      var w=r*.36,d=[[-w,-r],[w,-r],[w,-w],[r,-w],[r,w],[w,w],[w,r],[-w,r],[-w,w],[-r,w],[-r,-w],[-w,-w]],p=[];
+      for(var i=0;i<d.length;i++) p.push((cx+d[i][0]).toFixed(2)+','+(cy+d[i][1]).toFixed(2));
+      return '<polygon points="'+p.join(' ')+'" '+at+'/>';
+    }
+    return '';
+  }
+  function svgWrap(inner,needHatch){
+    var defs='';
+    if(needHatch){
+      patSeq++;
+      var pid='h'+patSeq;
+      defs='<defs><pattern id="'+pid+'" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">'+
+           '<rect width="6" height="6" fill="'+PAPER+'"/>'+
+           '<line x1="0" y1="0" x2="0" y2="6" stroke="'+FIG+'" stroke-width="2"/></pattern></defs>';
+      inner=inner.replace(/HATCHREF/g,'url(#'+pid+')');
+    }
+    return '<svg viewBox="0 0 100 100" aria-hidden="true">'+defs+inner+'</svg>';
+  }
+  function fillAttr(f){
+    if(f==='solid') return 'fill="'+FIG+'"';
+    if(f==='hatch') return 'fill="HATCHREF"';
+    return 'fill="'+PAPER+'"';
+  }
+  function shapeEl(shape,cx,cy,r,fill,rot,mark){
+    var sw=Math.max(1.8,r*.15).toFixed(2);
+    var at=fillAttr(fill)+' stroke="'+FIG+'" stroke-width="'+sw+'" stroke-linejoin="round"';
+    var body=shapePath(shape,cx,cy,r,at);
+    var contrast=(fill==='solid')?PAPER:FIG;
+    if(rot!==null&&rot!==undefined){
+      var a2=rot*Math.PI/180;
+      body+='<line x1="'+(cx+r*.42*Math.cos(a2)).toFixed(2)+'" y1="'+(cy+r*.42*Math.sin(a2)).toFixed(2)+
+            '" x2="'+(cx+r*.95*Math.cos(a2)).toFixed(2)+'" y2="'+(cy+r*.95*Math.sin(a2)).toFixed(2)+
+            '" stroke="'+contrast+'" stroke-width="'+(sw*1.5).toFixed(2)+'" stroke-linecap="round"/>';
+    }
+    if(mark==='dot') body+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(r*.26).toFixed(2)+'" fill="'+contrast+'"/>';
+    else if(mark==='bar') body+='<rect x="'+(cx-r*.5).toFixed(2)+'" y="'+(cy-r*.13).toFixed(2)+
+      '" width="'+r.toFixed(2)+'" height="'+(r*.26).toFixed(2)+'" fill="'+contrast+'"/>';
+    else if(mark==='ring') body+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(r*.44).toFixed(2)+
+      '" fill="none" stroke="'+contrast+'" stroke-width="'+Math.max(1.4,r*.13).toFixed(2)+'"/>';
+    return body;
+  }
+  function attrSVG(a){
+    var usePos=!!a.pos,base=usePos?12.5:15;
+    var r=base*a.size,gap=4;
+    var cx=usePos?a.pos.x:50,cy=usePos?a.pos.y:50;
+    var total=a.count*2*r+(a.count-1)*gap;
+    var x=cx-total/2+r,out='';
+    for(var i=0;i<a.count;i++){ out+=shapeEl(a.shape,x,cy,r,a.fill,a.rot,a.mark); x+=2*r+gap; }
+    return svgWrap(out,a.fill==='hatch');
+  }
+  function attrKey(a){
+    return ['A',a.shape,a.count,a.fill,a.size,a.rot,
+            a.pos?a.pos.x+':'+a.pos.y:'-',a.mark||'-'].join('|');
+  }
+
+  function bits(m,n){var c=0;for(var b=0;b<(n||6);b++) if(m&(1<<b)) c++;return c;}
+  function setSVG(d){
+    var out='',b,ang;
+    if(d.variant==='spokes'){
+      for(b=0;b<6;b++){
+        if(!(d.mask&(1<<b))) continue;
+        ang=(-90+b*60)*Math.PI/180;
+        out+='<line x1="50" y1="50" x2="'+(50+32*Math.cos(ang)).toFixed(2)+'" y2="'+
+             (50+32*Math.sin(ang)).toFixed(2)+'" stroke="'+FIG+'" stroke-width="4.5" stroke-linecap="round"/>';
+      }
+      if(!d.noDot) out+='<circle cx="50" cy="50" r="4.5" fill="'+FIG+'"/>';
+    }else if(d.variant==='blocks'){
+      var xs=[28,50,72],ys=[34,66];
+      for(b=0;b<6;b++){
+        if(!(d.mask&(1<<b))) continue;
+        out+='<rect x="'+(xs[b%3]-8)+'" y="'+(ys[Math.floor(b/3)]-8)+
+             '" width="16" height="16" rx="2" fill="'+FIG+'"/>';
+      }
+      if(!d.noDot) out+='<circle cx="50" cy="50" r="4.5" fill="'+FIG+'"/>';
+    }else if(d.variant==='tips'){
+      out+='<line x1="18" y1="52" x2="86" y2="52" stroke="'+FIG+'" stroke-width="2.6"/>'+
+           '<line x1="52" y1="18" x2="52" y2="86" stroke="'+FIG+'" stroke-width="2.6"/>';
+      var tp=[{x:52,y:18},{x:86,y:52},{x:52,y:86},{x:18,y:52}];
+      for(b=0;b<4;b++){
+        if(!(d.mask&(1<<b))) continue;
+        out+='<circle cx="'+tp[b].x+'" cy="'+tp[b].y+'" r="6" fill="'+FIG+'"/>';
+      }
+    }else if(d.variant==='frame'){
+      var E=[
+        '<line x1="24" y1="24" x2="76" y2="24"',
+        '<line x1="76" y1="24" x2="76" y2="76"',
+        '<line x1="24" y1="76" x2="76" y2="76"',
+        '<line x1="24" y1="24" x2="24" y2="76"',
+        '<line x1="24" y1="24" x2="76" y2="76"',
+        '<line x1="24" y1="76" x2="76" y2="24"'
+      ];
+      for(b=0;b<6;b++){
+        if(!(d.mask&(1<<b))) continue;
+        out+=E[b]+' stroke="'+FIG+'" stroke-width="2.6" stroke-linecap="round"/>';
+      }
+      if(!d.noDot) out+='<circle cx="50" cy="50" r="4" fill="'+FIG+'"/>';
+    }else if(d.variant==='arrows'){
+      var DIRS=[[0,-1],[1,0],[0,1],[-1,0]];
+      out+='<circle cx="50" cy="50" r="4" fill="'+FIG+'"/>';
+      for(b=0;b<4;b++){
+        if(!(d.mask&(1<<b))) continue;
+        var dx=DIRS[b][0],dy=DIRS[b][1],ex=50+dx*29,ey=50+dy*29;
+        out+='<line x1="50" y1="50" x2="'+ex+'" y2="'+ey+'" stroke="'+FIG+'" stroke-width="3.2" stroke-linecap="round"/>'+
+             '<polygon points="'+(ex+dx*7)+','+(ey+dy*7)+' '+(ex-dy*5)+','+(ey+dx*5)+' '+(ex+dy*5)+','+(ey-dx*5)+'" fill="'+FIG+'"/>';
+      }
+    }else if(d.variant==='plus'){
+      var Z=[[41,19,18,23],[60,41,23,18],[41,60,18,23],[17,41,23,18],[41,41,18,18]];
+      for(b=4;b>=0;b--){
+        out+='<rect x="'+Z[b][0]+'" y="'+Z[b][1]+'" width="'+Z[b][2]+'" height="'+Z[b][3]+
+             '" fill="'+((d.mask&(1<<b))?FIG:PAPER)+'" stroke="'+FIG+'" stroke-width="2"/>';
+      }
+    }else{
+      out+='<circle cx="50" cy="50" r="27" fill="none" stroke="'+FIG+'" stroke-opacity=".22" stroke-width="2"/>';
+      for(b=0;b<6;b++){
+        if(!(d.mask&(1<<b))) continue;
+        ang=(-90+b*60)*Math.PI/180;
+        out+='<circle cx="'+(50+27*Math.cos(ang)).toFixed(2)+'" cy="'+(50+27*Math.sin(ang)).toFixed(2)+
+             '" r="7" fill="'+FIG+'"/>';
+      }
+      if(!d.noDot) out+='<circle cx="50" cy="50" r="4.5" fill="'+FIG+'"/>';
+    }
+    return svgWrap(out,false);
+  }
+
+  function neckSVG(d){
+    var out='',k;
+    if(d.variant==='sectors'){
+      var R=33;
+      for(k=0;k<8;k++){
+        if(!(d.mask&(1<<k))) continue;
+        var p1=ptAt(-112.5+k*45,R,50,50), p2=ptAt(-67.5+k*45,R,50,50);
+        out+='<polygon points="50,50 '+p1.x.toFixed(2)+','+p1.y.toFixed(2)+' '+
+             p2.x.toFixed(2)+','+p2.y.toFixed(2)+'" fill="'+FIG+'"/>';
+      }
+      out+='<polygon points="'+poly(8,-112.5,50,50,R)+'" fill="none" stroke="'+FIG+'" stroke-width="2" stroke-linejoin="round"/>';
+      for(k=0;k<8;k++){
+        var pv=ptAt(-112.5+k*45,R,50,50);
+        out+='<line x1="50" y1="50" x2="'+pv.x.toFixed(2)+'" y2="'+pv.y.toFixed(2)+
+             '" stroke="'+FIG+'" stroke-width="1.1"/>';
+      }
+    }else{
+      out+='<circle cx="50" cy="50" r="30" fill="none" stroke="'+FIG+'" stroke-opacity=".2" stroke-width="1.5"/>';
+      for(k=0;k<8;k++){
+        var a=(-90+k*45)*Math.PI/180;
+        out+='<circle cx="'+(50+30*Math.cos(a)).toFixed(2)+'" cy="'+(50+30*Math.sin(a)).toFixed(2)+
+             '" r="6.5" fill="'+((d.mask&(1<<k))?FIG:PAPER)+'" stroke="'+FIG+'" stroke-width="1.8"/>';
+      }
+    }
+    return svgWrap(out,false);
+  }
+  function clockSVG(d){
+    var out='';
+    if(d.frame==='square') out+='<rect x="18" y="18" width="64" height="64" fill="none" stroke="'+FIG+'" stroke-width="2"/>';
+    else if(d.frame==='circle') out+='<circle cx="50" cy="50" r="34" fill="none" stroke="'+FIG+'" stroke-width="2"/>';
+    else out+='<polygon points="'+poly(4,-90,50,50,34)+'" fill="none" stroke="'+FIG+'" stroke-width="2" stroke-linejoin="round"/>';
+    function hand(idx,len){
+      var a=(-90+idx*90)*Math.PI/180;
+      var hx=Math.cos(a),hy=Math.sin(a);
+      var ex=50+len*hx,ey=50+len*hy;
+      return '<line x1="50" y1="50" x2="'+ex.toFixed(2)+'" y2="'+ey.toFixed(2)+
+             '" stroke="'+FIG+'" stroke-width="3.4" stroke-linecap="round"/>'+
+             '<polygon points="'+(ex+hx*7).toFixed(2)+','+(ey+hy*7).toFixed(2)+' '+
+             (ex-hy*4.6).toFixed(2)+','+(ey+hx*4.6).toFixed(2)+' '+
+             (ex+hy*4.6).toFixed(2)+','+(ey-hx*4.6).toFixed(2)+'" fill="'+FIG+'"/>';
+    }
+    out+=hand(d.a,26)+hand(d.b,d.eq?26:15);
+    out+='<circle cx="50" cy="50" r="3.6" fill="'+FIG+'"/>';
+    return svgWrap(out,false);
+  }
+  function accSVG(d){
+    var out='',i,s;
+    var at='fill="none" stroke="'+FIG+'" stroke-width="2.6" stroke-linejoin="round"';
+    for(i=0;i<d.b.length;i++){ s=SLOT4[d.b[i]]; out+=shapePath(d.sB,s.x,s.y,13,at); }
+    for(i=0;i<d.a.length;i++){ s=SLOT4[d.a[i]]; out+=shapePath(d.sA,s.x,s.y,13,at); }
+    if(!d.noDot) out+='<circle cx="50" cy="50" r="4.5" fill="'+FIG+'"/>';
+    return svgWrap(out,false);
+  }
+  function signSVG(d){
+    var dir=d.dir||1; /* 1 = /, -1 = omvänd lutning */
+    var y1=(dir===1)?85:15, y2=(dir===1)?15:85;
+    var out='<line x1="15" y1="'+y1+'" x2="85" y2="'+y2+'" stroke="'+FIG+'" stroke-width="3" stroke-linecap="round"/>';
+    var ux=0.707, uy=(dir===1)?-0.707:0.707;
+    var nx=(dir===1)?-0.707:0.707, ny=-0.707;
+    var n=Math.abs(d.v), s=(d.v>0)?1:-1;
+    for(var i=0;i<n;i++){
+      var t=(i-(n-1)/2)*15;
+      var px=50+t*ux+s*13.4*nx, py=50+t*uy+s*13.4*ny;
+      out+='<circle cx="'+px.toFixed(2)+'" cy="'+py.toFixed(2)+'" r="4.6" fill="'+FIG+'"/>';
+    }
+    return svgWrap(out,false);
+  }
+  function quadSVG(d){
+    var out='<line x1="16" y1="52" x2="88" y2="52" stroke="'+FIG+'" stroke-width="2"/>'+
+            '<line x1="52" y1="16" x2="52" y2="88" stroke="'+FIG+'" stroke-width="2"/>';
+    var occ=[[],[],[],[]];
+    if(d.a!==null&&d.a!==undefined) occ[d.a].push('dot');
+    if(d.b!==null&&d.b!==undefined) occ[d.b].push('plus');
+    if(d.t!==null&&d.t!==undefined) occ[d.t].push('tri');
+    for(var q=0;q<4;q++){
+      var list=occ[q];
+      for(var i=0;i<list.length;i++){
+        var base=QUAD[q];
+        var x=base.x+(i-(list.length-1)/2)*14, y=base.y;
+        if(list[i]==='dot') out+='<circle cx="'+x+'" cy="'+y+'" r="5.2" fill="'+FIG+'"/>';
+        else if(list[i]==='plus')
+          out+='<line x1="'+(x-5.5)+'" y1="'+y+'" x2="'+(x+5.5)+'" y2="'+y+'" stroke="'+FIG+'" stroke-width="2.8" stroke-linecap="round"/>'+
+               '<line x1="'+x+'" y1="'+(y-5.5)+'" x2="'+x+'" y2="'+(y+5.5)+'" stroke="'+FIG+'" stroke-width="2.8" stroke-linecap="round"/>';
+        else out+='<polygon points="'+poly(3,-90,x,y,6.4)+'" fill="none" stroke="'+FIG+'" stroke-width="2.2" stroke-linejoin="round"/>';
+      }
+    }
+    return svgWrap(out,false);
+  }
+  function freqSVG(d){
+    var out='',i;
+    for(i=0;i<d.h;i++){
+      var y=50+(i-(d.h-1)/2)*13;
+      out+='<line x1="22" y1="'+y.toFixed(1)+'" x2="78" y2="'+y.toFixed(1)+'" stroke="'+FIG+'" stroke-width="2.8" stroke-linecap="round"/>';
+    }
+    for(i=0;i<d.v;i++){
+      var x=50+(i-(d.v-1)/2)*13;
+      out+='<line x1="'+x.toFixed(1)+'" y1="22" x2="'+x.toFixed(1)+'" y2="78" stroke="'+FIG+'" stroke-width="2.8" stroke-linecap="round"/>';
+    }
+    return svgWrap(out,false);
+  }
+  function stripSVG(d){
+    var out='',i;
+    var x0=14,w=18,y0=41,h=20;
+    for(i=0;i<4;i++){
+      out+='<rect x="'+(x0+i*w)+'" y="'+y0+'" width="'+w+'" height="'+h+
+           '" fill="'+(i===d.f?FIG:PAPER)+'" stroke="'+FIG+'" stroke-width="2"/>';
+    }
+    if(d.arrow){
+      var ax=x0+d.f*w+w/2;
+      if(d.arrow==='up'){
+        out+='<line x1="'+ax+'" y1="'+(y0+h+2)+'" x2="'+ax+'" y2="20" stroke="'+FIG+'" stroke-width="2.8"/>'+
+             '<polygon points="'+ax+',14 '+(ax-5)+',23 '+(ax+5)+',23" fill="'+FIG+'"/>';
+      }else{
+        out+='<line x1="'+ax+'" y1="'+(y0-2)+'" x2="'+ax+'" y2="80" stroke="'+FIG+'" stroke-width="2.8"/>'+
+             '<polygon points="'+ax+',86 '+(ax-5)+',77 '+(ax+5)+',77" fill="'+FIG+'"/>';
+      }
+    }
+    return svgWrap(out,false);
+  }
+
+  function renderCell(d){
+    if(d.k==='set') return setSVG(d);
+    if(d.k==='neck') return neckSVG(d);
+    if(d.k==='clock') return clockSVG(d);
+    if(d.k==='acc') return accSVG(d);
+    if(d.k==='sign') return signSVG(d);
+    if(d.k==='quad') return quadSVG(d);
+    if(d.k==='freq') return freqSVG(d);
+    if(d.k==='strip') return stripSVG(d);
+    return attrSVG(d);
+  }
+  function cellKey(d){
+    if(d.k==='set') return 'S|'+d.variant+'|'+d.mask+'|'+(d.noDot?1:0);
+    if(d.k==='neck') return 'N|'+d.variant+'|'+d.mask;
+    if(d.k==='clock'){
+      if(d.eq){var lo=Math.min(d.a,d.b),hi=Math.max(d.a,d.b);return 'C|eq|'+lo+'|'+hi;}
+      return 'C|'+d.a+'|'+d.b;
+    }
+    if(d.k==='acc') return 'K|'+d.a.slice().sort().join(',')+'|'+d.b.slice().sort().join(',')+
+                           '|'+d.sA+d.sB+'|'+(d.noDot?1:0);
+    if(d.k==='sign') return 'D|'+d.v;
+    if(d.k==='quad') return 'Q|'+(d.a===null?'x':d.a)+'|'+(d.b===null?'x':d.b)+'|'+
+                            (d.t===null||d.t===undefined?'x':d.t);
+    if(d.k==='freq') return 'F|'+d.h+'|'+d.v;
+    if(d.k==='strip') return 'R|'+d.f+'|'+(d.arrow||'x');
+    return attrKey(d);
+  }
+
+  /* ================= alternativbyggare ================= */
+  var LBL={rep:'repetition',ic:'ofullständig',wp:'fel princip',md:'minimal skillnad',
+           mx:'matrisruta',inv:'tappad detalj'};
+  function assemble(answer,pools,quota){
+    var out=[{a:answer,t:'rätt'}],seen={};
+    seen[cellKey(answer)]=1;
+    function take(p,n){
+      var list=shuffle((pools[p]||[]).slice()),got=0;
+      for(var q=0;q<list.length&&got<n&&out.length<6;q++){
+        var k=cellKey(list[q]);
+        if(seen[k]) continue;
+        seen[k]=1; out.push({a:list[q],t:LBL[p]}); got++;
+      }
+    }
+    for(var i=0;i<quota.length;i++) take(quota[i][0],quota[i][1]);
+    var all=['ic','md','wp','mx','rep','inv'];
+    for(i=0;i<all.length&&out.length<6;i++) take(all[i],6-out.length);
+    if(out.length<6) return null;
+    shuffle(out);
+    return {options:out.map(function(x){return x.a;}),traps:out.map(function(x){return x.t;})};
+  }
+  function neighbourPool(grid,answer){
+    var p=[],k=cellKey(answer);
+    [grid[2][1],grid[1][2]].forEach(function(c){ if(cellKey(c)!==k) p.push(clone(c)); });
+    return p;
+  }
+  function matrixPool(grid,answer){
+    var p=[],k=cellKey(answer);
+    for(var r=0;r<3;r++) for(var c=0;c<3;c++){
+      if(r===2&&c===2) continue;
+      if(cellKey(grid[r][c])!==k) p.push(clone(grid[r][c]));
+    }
+    return p;
+  }
+  function distinctCount(grid){
+    var s={},n=0;
+    for(var r=0;r<3;r++) for(var c=0;c<3;c++){
+      var k=cellKey(grid[r][c]); if(!s[k]){s[k]=1;n++;}
+    }
+    return n;
+  }
+
+  /* ================= motor: regelmatris ================= */
+  var LEVELS={
+    1:{n:1,fams:['KR','PP'],require:null},
+    2:{n:2,fams:['KR','PP'],require:null},
+    3:{n:2,fams:['KR','PP','F3'],require:null},
+    4:{n:3,fams:['KR','PP','F3'],require:null},
+    5:{n:3,fams:['KR','PP','F3'],require:'F3'},
+    6:{n:3,fams:['KR','PP','F3','F2'],require:'F3'},
+    7:{n:4,fams:['KR','PP','F3','F2'],require:'F2'},
+    8:{n:4,fams:['PP','F3','F2'],require:'F2'}
+  };
+  function idxOptionsFor(attr,fams){
+    var o=[];
+    if(fams.indexOf('KR')>-1||fams.indexOf('PP')>-1){o.push('r');o.push('c');}
+    if(ATTRS[attr].ordered&&fams.indexOf('PP')>-1){o.push('rRev');o.push('cRev');}
+    if(fams.indexOf('F3')>-1||fams.indexOf('F2')>-1){o.push('d1');o.push('d2');}
+    return o;
+  }
+  function compatible(a,used){
+    if(a==='pos'&&(used.indexOf('count')>-1||used.indexOf('rot')>-1)) return false;
+    if(a==='rot'&&(used.indexOf('count')>-1||used.indexOf('pos')>-1)) return false;
+    if(a==='count'&&(used.indexOf('pos')>-1||used.indexOf('rot')>-1)) return false;
+    return true;
+  }
+  function genTransform(level){
+    var cfg=LEVELS[level]||LEVELS[4],i;
+    for(var att=0;att<900;att++){
+      var names=shuffle(Object.keys(ATTRS)),used=[];
+      for(i=0;i<names.length&&used.length<cfg.n;i++)
+        if(compatible(names[i],used)) used.push(names[i]);
+      if(used.length<cfg.n) continue;
+
+      var assigned={},taken={},bad=false;
+      for(i=0;i<used.length;i++){
+        var attr=used[i];
+        var opts=idxOptionsFor(attr,cfg.fams).filter(function(k){return !taken[k];});
+        if(!opts.length){bad=true;break;}
+        var idx=pick(opts); taken[idx]=1;
+        var vals=ATTRS[attr].values(),nullSlot=null;
+        if(cfg.fams.indexOf('F2')>-1&&ATTRS[attr].nullable&&DIST[idx]&&Math.random()<.75){
+          nullSlot=rnd(3); vals[nullSlot]=null;
+        }
+        assigned[attr]={idx:idx,values:vals,nullSlot:nullSlot};
+      }
+      if(bad) continue;
+
+      var fams=used.map(function(a){return familyOf(a,assigned[a]);});
+      if(cfg.require&&fams.indexOf(cfg.require)<0) continue;
+      if(cfg.n>1){
+        var anyCol=false,anyRow=false;
+        for(i=0;i<used.length;i++){
+          if(COLVARY[assigned[used[i]].idx]) anyCol=true;
+          if(ROWVARY[assigned[used[i]].idx]) anyRow=true;
+        }
+        if(!anyCol||!anyRow) continue;
+      }
+
+      var lockOne=(used.indexOf('rot')>-1||used.indexOf('pos')>-1);
+      var fixed={k:'attr',shape:pick(SHAPES),fill:'solid',
+                 count:lockOne?1:pick([1,2,2,3]),size:.92,rot:null,pos:null,mark:null};
+      var grid=[],r,c;
+      for(r=0;r<3;r++){
+        var row=[];
+        for(c=0;c<3;c++){
+          var a=clone(fixed);
+          for(i=0;i<used.length;i++)
+            a[used[i]]=assigned[used[i]].values[IDX[assigned[used[i]].idx](r,c)];
+          row.push(a);
+        }
+        grid.push(row);
+      }
+      if(cfg.n>=2&&distinctCount(grid)<9) continue;
+
+      var answer=grid[2][2],key=cellKey(answer);
+      var pools={rep:neighbourPool(grid,answer),mx:matrixPool(grid,answer),ic:[],wp:[],md:[]};
+      for(i=0;i<used.length;i++){
+        (function(a){
+          [grid[2][1],grid[1][2]].forEach(function(src){
+            if(src[a]===answer[a]) return;
+            var o=clone(answer); o[a]=src[a];
+            if(cellKey(o)!==key) pools.ic.push(o);
+          });
+          ['r','c','rRev','cRev','d1','d2'].forEach(function(ak){
+            if(ak===assigned[a].idx) return;
+            var v=assigned[a].values[IDX[ak](2,2)];
+            if(v===answer[a]) return;
+            var o=clone(answer); o[a]=v;
+            if(cellKey(o)!==key) pools.wp.push(o);
+          });
+          assigned[a].values.forEach(function(v){
+            if(v===answer[a]) return;
+            var o=clone(answer); o[a]=v;
+            if(cellKey(o)!==key) pools.md.push(o);
+          });
+        })(used[i]);
+      }
+      var built=assemble(answer,pools,(level>=7)?[['ic',3],['rep',1],['wp',1]]:[['rep',1],['ic',2],['wp',1],['md',1]]);
+      if(!built) continue;
+
+      var lines=used.map(function(a){
+        return {tag:familyOf(a,assigned[a]),text:explain(a,assigned[a])};
+      });
+      var uf=[]; fams.forEach(function(f){if(uf.indexOf(f)<0)uf.push(f);});
+      return {grid:grid,answer:answer,options:built.options,traps:built.traps,
+              lines:lines,fams:uf,nrules:used.length,level:level,struct:'Regelmatris'};
+    }
+    return null;
+  }
+
+  /* ================= motor: överlagring ================= */
+  function genOverlay(level){
+    var vpool=level>=5?['spokes','blocks','ring','tips','frame','arrows','plus']:['spokes','blocks','ring','frame','plus'];
+    var variant=pick(vpool);
+    var nb=(variant==='tips'||variant==='arrows')?4:(variant==='plus'?5:6);
+    var maxMask=(1<<nb)-1;
+    var op=(level>=7)?'xor':(Math.random()<.5?'xor':'or');
+    var comb=function(a,b){return op==='xor'?(a^b):(a|b);};
+    for(var t=0;t<700;t++){
+      var M=[[1+rnd(maxMask),1+rnd(maxMask),0],[1+rnd(maxMask),1+rnd(maxMask),0],[0,0,0]],r,c;
+      M[0][2]=comb(M[0][0],M[0][1]); M[1][2]=comb(M[1][0],M[1][1]);
+      M[2][0]=comb(M[0][0],M[1][0]); M[2][1]=comb(M[0][1],M[1][1]);
+      M[2][2]=comb(M[2][0],M[2][1]);
+      var ok=true;
+      for(r=0;r<3;r++) for(c=0;c<3;c++){ if(M[r][c]===0||bits(M[r][c],nb)>nb-1) ok=false; }
+      if(!ok) continue;
+      if(op==='xor'&&bits(M[2][2],nb)<1) continue;
+
+      var hasDot=(variant==='spokes'||variant==='blocks'||variant==='ring');
+      var grid=[[],[],[]];
+      for(r=0;r<3;r++) for(c=0;c<3;c++)
+        grid[r].push({k:'set',mask:M[r][c],variant:variant,noDot:false});
+      if(distinctCount(grid)<(nb===4?6:7)) continue;
+
+      var answer=grid[2][2],key=cellKey(answer);
+      var pools={rep:neighbourPool(grid,answer),mx:matrixPool(grid,answer),wp:[],ic:[],inv:[]};
+      [(M[2][0]|M[2][1]),(M[2][0]^M[2][1]),(M[2][0]&M[2][1])].forEach(function(m){
+        if(!m) return;
+        var o={k:'set',mask:m,variant:variant,noDot:false};
+        if(cellKey(o)!==key) pools.wp.push(o);
+      });
+      for(var b=0;b<nb;b++){
+        var m2=M[2][2]^(1<<b);
+        if(m2) pools.ic.push({k:'set',mask:m2,variant:variant,noDot:false});
+      }
+      if(hasDot) pools.inv.push({k:'set',mask:M[2][2],variant:variant,noDot:true});
+      var built=assemble(answer,pools,hasDot?[['wp',2],['rep',1],['inv',1],['ic',1]]:[['wp',2],['rep',1],['ic',2]]);
+      if(!built) continue;
+
+      var lines=[{tag:'ÖL',text:op==='xor'
+        ? 'De två första rutorna i raden läggs ihop, men det som finns på samma plats i båda tar ut varandra och försvinner. Bara det som finns i exakt en av dem blir kvar. Samma regel gäller nedåt i kolumnerna.'
+        : 'De två första rutorna i raden läggs ihop till den tredje – allt som finns i minst en av dem finns kvar. Samma regel gäller nedåt i kolumnerna.'}];
+      if(hasDot) lines.push({tag:'—',text:'Pricken i mitten finns i varje ruta och ingår inte i regeln.',note:true});
+      else lines.push({tag:'—',text:'Grundfiguren är konstant – det är de markerade delarna som följer regeln.',note:true});
+      return {grid:grid,answer:answer,options:built.options,traps:built.traps,
+              lines:lines,fams:['ÖL'],nrules:1,level:level,struct:'Överlagring'};
+    }
+    return null;
+  }
+
+  /* ================= motor: prickar med tecken ================= */
+  function genSign(level){
+    var range=(level>=7)?3:2;
+    for(var t=0;t<800;t++){
+      var V=[[0,0,0],[0,0,0],[0,0,0]],r,c,ok=true;
+      V[0][0]=rnd(2*range+1)-range; V[0][1]=rnd(2*range+1)-range;
+      V[1][0]=rnd(2*range+1)-range; V[1][1]=rnd(2*range+1)-range;
+      V[0][2]=V[0][0]+V[0][1]; V[1][2]=V[1][0]+V[1][1];
+      V[2][0]=V[0][0]+V[1][0]; V[2][1]=V[0][1]+V[1][1];
+      V[2][2]=V[2][0]+V[2][1];
+      var pos=0,neg=0;
+      for(r=0;r<3;r++) for(c=0;c<3;c++){
+        if(Math.abs(V[r][c])>4) ok=false;
+        if(V[r][c]>0) pos++; if(V[r][c]<0) neg++;
+      }
+      if(!ok||pos<2||neg<2) continue;
+
+      var dir=pick([1,-1]);
+      var grid=[[],[],[]];
+      for(r=0;r<3;r++) for(c=0;c<3;c++) grid[r].push({k:'sign',v:V[r][c],dir:dir});
+      if(distinctCount(grid)<7) continue;
+
+      var answer=grid[2][2],av=answer.v;
+      var pools={rep:neighbourPool(grid,answer),mx:matrixPool(grid,answer),wp:[],ic:[],md:[]};
+      var wpv=Math.abs(V[2][0])+Math.abs(V[2][1]);
+      if(wpv<=4&&wpv!==av) pools.wp.push({k:'sign',v:wpv,dir:dir});
+      if(av!==0&&Math.abs(av)<=4) pools.wp.push({k:'sign',v:-av,dir:dir});
+      [av+1,av-1].forEach(function(v){ if(Math.abs(v)<=4&&v!==av) pools.ic.push({k:'sign',v:v,dir:dir}); });
+      [av+2,av-2,-av+1,-av-1].forEach(function(v){ if(Math.abs(v)<=4&&v!==av) pools.md.push({k:'sign',v:v,dir:dir}); });
+
+      var built=assemble(answer,pools,[['wp',2],['rep',1],['ic',2]]);
+      if(!built) continue;
+
+      var lines=[
+        {tag:'AR',text:'Prickar ovanför linjen räknas som plus, prickar nedanför som minus. Tredje rutan i varje rad är summan av de två första – samma sak nedåt i kolumnerna.'},
+        {tag:'—',text:'Lika många prickar på var sin sida tar ut varandra helt: då återstår bara linjen. En tom ruta kan alltså vara helt rätt svar.',note:true}
+      ];
+      return {grid:grid,answer:answer,options:built.options,traps:built.traps,
+              lines:lines,fams:['AR'],nrules:1,level:level,struct:'Prickar med tecken'};
+    }
+    return null;
+  }
+
+  /* ================= motor: frekvensbalans ================= */
+  function genFreq(level){
+    for(var t=0;t<800;t++){
+      var TH=5+rnd(3), TV=5+rnd(3);
+      var H=[[0,0,0],[0,0,0],[0,0,0]], V=[[0,0,0],[0,0,0],[0,0,0]],r,c,ok=true;
+      for(r=0;r<2;r++) for(c=0;c<2;c++){ H[r][c]=rnd(4); V[r][c]=rnd(4); }
+      for(r=0;r<2;r++){ H[r][2]=TH-H[r][0]-H[r][1]; V[r][2]=TV-V[r][0]-V[r][1]; }
+      for(c=0;c<3;c++){ H[2][c]=TH-H[0][c]-H[1][c]; V[2][c]=TV-V[0][c]-V[1][c]; }
+      for(r=0;r<3;r++) for(c=0;c<3;c++){
+        if(H[r][c]<0||H[r][c]>4||V[r][c]<0||V[r][c]>4) ok=false;
+        if(H[r][c]===0&&V[r][c]===0) ok=false;
+      }
+      if(!ok) continue;
+
+      var grid=[[],[],[]];
+      for(r=0;r<3;r++) for(c=0;c<3;c++) grid[r].push({k:'freq',h:H[r][c],v:V[r][c]});
+      if(distinctCount(grid)<7) continue;
+
+      var answer=grid[2][2];
+      var pools={rep:neighbourPool(grid,answer),mx:matrixPool(grid,answer),wp:[],ic:[],md:[]};
+      if(answer.h!==answer.v) pools.wp.push({k:'freq',h:answer.v,v:answer.h});
+      [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(dd){
+        var h2=answer.h+dd[0], v2=answer.v+dd[1];
+        if(h2>=0&&h2<=4&&v2>=0&&v2<=4&&(h2||v2)) pools.ic.push({k:'freq',h:h2,v:v2});
+      });
+      [[1,1],[-1,-1],[1,-1],[-1,1],[2,0],[0,2]].forEach(function(dd){
+        var h2=answer.h+dd[0], v2=answer.v+dd[1];
+        if(h2>=0&&h2<=4&&v2>=0&&v2<=4&&(h2||v2)) pools.md.push({k:'freq',h:h2,v:v2});
+      });
+
+      var built=assemble(answer,pools,[['rep',1],['wp',1],['ic',2],['md',1]]);
+      if(!built) continue;
+
+      var lines=[
+        {tag:'FB',text:'Räkna elementtyperna var för sig: i varje rad och varje kolumn är summan av vågräta streck '+TH+' och summan av lodräta streck '+TV+'. Den saknade rutan är det som fattas för att summorna ska gå ihop.'},
+        {tag:'—',text:'Hur strecken är placerade i rutan spelar ingen roll – det är bara antalet av varje typ som räknas.',note:true}
+      ];
+      return {grid:grid,answer:answer,options:built.options,traps:built.traps,
+              lines:lines,fams:['FB'],nrules:2,level:level,struct:'Frekvensbalans'};
+    }
+    return null;
+  }
+
+  /* ================= motor: remsa ================= */
+  function genStrip(level){
+    for(var t=0;t<600;t++){
+      var sc=pick([1,3]), sr=pick([1,2,3]), i0=rnd(4);
+      var A=shuffle(['up','down',null]), dd=pick(['d1','d2']);
+      var grid=[[],[],[]],r,c;
+      for(r=0;r<3;r++) for(c=0;c<3;c++)
+        grid[r].push({k:'strip', f:(i0+c*sc+r*sr)%4, arrow:A[IDX[dd](r,c)]});
+      if(distinctCount(grid)<7) continue;
+
+      var answer=grid[2][2];
+      var pools={rep:neighbourPool(grid,answer),mx:matrixPool(grid,answer),wp:[],ic:[],md:[]};
+      pools.wp.push({k:'strip',f:(answer.f+2)%4,arrow:answer.arrow});
+      if(answer.arrow==='up') pools.wp.push({k:'strip',f:answer.f,arrow:'down'});
+      else if(answer.arrow==='down') pools.wp.push({k:'strip',f:answer.f,arrow:'up'});
+      [1,3].forEach(function(s){ pools.ic.push({k:'strip',f:(answer.f+s)%4,arrow:answer.arrow}); });
+      ['up','down',null].forEach(function(a){
+        if(a!==answer.arrow) pools.ic.push({k:'strip',f:answer.f,arrow:a});
+      });
+      [1,3].forEach(function(s){
+        ['up','down',null].forEach(function(a){
+          if(a!==answer.arrow) pools.md.push({k:'strip',f:(answer.f+s)%4,arrow:a});
+        });
+      });
+
+      var built=assemble(answer,pools,[['rep',1],['wp',1],['ic',2],['md',1]]);
+      if(!built) continue;
+
+      var dir=(sc===1)?'höger':'vänster';
+      var lines=[
+        {tag:'PP',text:'Den fyllda rutan flyttar ett steg åt '+dir+' för varje ruta åt höger, och '+sr+' steg för varje rad nedåt – när den når kanten fortsätter den från andra sidan.'},
+        {tag:'F3',text:'Pil upp, pil ner och ingen pil förekommer exakt en gång i varje rad och varje kolumn. Pilen sitter alltid vid den fyllda rutan.'},
+        {tag:'—',text:'Två oberoende system: positionen och pilen. Lös dem var för sig.',note:true}
+      ];
+      return {grid:grid,answer:answer,options:built.options,traps:built.traps,
+              lines:lines,fams:['PP','F3'],nrules:2,level:level,struct:'Remsa'};
+    }
+    return null;
+  }
+
+  /* ================= motor: rörelse (kvadranter) ================= */
+  function genQuad(level){
+    for(var t=0;t<700;t++){
+      var three=(level>=7);
+      var useF2=!three&&((level>=6)||(level>=5&&Math.random()<.35));
+      var sa=pick([1,3]),sb=pick([1,3]),a0=rnd(4),b0=rnd(4),t0=rnd(4);
+      var f2vals=null,dd=null;
+      if(useF2){
+        var qs=shuffle([0,1,2,3]);
+        f2vals=shuffle([qs[0],qs[1],null]);
+        dd=pick(['d1','d2']);
+      }
+      var grid=[[],[],[]],r,c;
+      for(r=0;r<3;r++) for(c=0;c<3;c++){
+        var cell={k:'quad', a:(a0+c*sa)%4,
+                  b:useF2?f2vals[IDX[dd](r,c)]:(b0+r*sb)%4,
+                  t:three?((t0+c*(4-sa))%4):null};
+        grid[r].push(cell);
+      }
+      if(distinctCount(grid)<8) continue;
+
+      var answer=grid[2][2];
+      var pools={rep:neighbourPool(grid,answer),mx:matrixPool(grid,answer),wp:[],ic:[],md:[]};
+      pools.wp.push({k:'quad',a:(answer.a+2)%4,b:answer.b,t:answer.t});
+      if(answer.b!==null) pools.wp.push({k:'quad',a:answer.b,b:answer.a,t:answer.t});
+      [1,3].forEach(function(s){
+        pools.ic.push({k:'quad',a:(answer.a+s)%4,b:answer.b,t:answer.t});
+        if(answer.b!==null) pools.md.push({k:'quad',a:answer.a,b:(answer.b+s)%4,t:answer.t});
+        if(answer.t!==null&&answer.t!==undefined) pools.ic.push({k:'quad',a:answer.a,b:answer.b,t:(answer.t+s)%4});
+      });
+      if(answer.b!==null&&!three) pools.ic.push({k:'quad',a:answer.a,b:null,t:answer.t});
+      if(useF2&&answer.b===null&&f2vals) f2vals.forEach(function(v){
+        if(v!==null) pools.ic.push({k:'quad',a:answer.a,b:v,t:answer.t});
+      });
+
+      var built=assemble(answer,pools,[['wp',1],['rep',1],['ic',2],['md',1]]);
+      if(!built) continue;
+
+      var lines=[{tag:'KV',text:'Pricken flyttar en kvadrant '+(sa===1?'medurs':'moturs')+
+        ' för varje ruta åt höger och står stilla nedåt i kolumnen.'}];
+      var fams=['KV'];
+      if(useF2){
+        lines.push({tag:'F2',text:'Plustecknet följer fördelning av två: i varje rad och varje kolumn finns det i två rutor och saknas helt i den tredje, och det växlar mellan två bestämda kvadranter.'});
+        fams.push('F2');
+      }else{
+        lines.push({tag:'KV',text:'Plustecknet flyttar en kvadrant '+(sb===1?'medurs':'moturs')+
+          ' för varje rad nedåt och står stilla i raden.'});
+      }
+      if(three){
+        lines.push({tag:'KV',text:'Triangeln flyttar en kvadrant '+(sa===1?'moturs':'medurs')+
+          ' för varje ruta åt höger – alltså åt motsatt håll mot pricken.'});
+      }
+      lines.push({tag:'—',text:'Följ varje markör för sig – de rör sig oberoende och kan hamna i samma kvadrant.',note:true});
+      return {grid:grid,answer:answer,options:built.options,traps:built.traps,
+              lines:lines,fams:fams,nrules:three?3:2,level:level,struct:'Rörelse'};
+    }
+    return null;
+  }
+
+  /* ================= motor: ackumulation ================= */
+  function genAccumulate(level){
+    var overlap=(level>=7);
+    for(var t=0;t<400;t++){
+      var sh=shuffle(['triangle','square','diamond','circle','cross']);
+      var sA=sh[0],sB=sh[1];
+      var slots=shuffle([0,1,2,3]);
+      var aS=[slots[0],slots[1]],bS=overlap?[slots[2],slots[0]]:[slots[2],slots[3]];
+      var grid=[[],[],[]],r,c;
+      for(r=0;r<3;r++) for(c=0;c<3;c++)
+        grid[r].push({k:'acc',a:aS.slice(0,c),b:bS.slice(0,r),sA:sA,sB:sB,noDot:false});
+      if(distinctCount(grid)<9) continue;
+
+      var answer=grid[2][2];
+      var pools={rep:neighbourPool(grid,answer),mx:matrixPool(grid,answer),ic:[],wp:[],inv:[],md:[]};
+      pools.ic.push({k:'acc',a:aS.slice(0,1),b:bS.slice(0,2),sA:sA,sB:sB,noDot:false});
+      pools.ic.push({k:'acc',a:aS.slice(0,2),b:bS.slice(0,1),sA:sA,sB:sB,noDot:false});
+      var other=[0,1,2,3].filter(function(s){return aS.indexOf(s)<0;});
+      if(other.length>=2) pools.wp.push({k:'acc',a:[other[0],other[1]],b:bS.slice(0,2),sA:sA,sB:sB,noDot:false});
+      pools.wp.push({k:'acc',a:bS.slice(0,2),b:aS.slice(0,2),sA:sA,sB:sB,noDot:false});
+      pools.inv.push({k:'acc',a:aS.slice(0,2),b:bS.slice(0,2),sA:sA,sB:sB,noDot:true});
+      if(other.length) pools.md.push({k:'acc',a:[aS[0],other[0]],b:bS.slice(0,2),sA:sA,sB:sB,noDot:false});
+
+      var built=assemble(answer,pools,[['rep',1],['ic',2],['wp',1],['inv',1]]);
+      if(!built) continue;
+
+      var NAM={triangle:'triangel',square:'kvadrat',diamond:'romb',circle:'cirkel',cross:'kors'};
+      var lines=[
+        {tag:'AK',text:'En '+NAM[sA]+' läggs till på en bestämd plats för varje steg åt höger.'},
+        {tag:'AK',text:'En '+NAM[sB]+' läggs till på en bestämd plats för varje rad nedåt.'},
+        {tag:'—',text:'Pricken i mitten finns i alla rutor och ingår inte i mönstret.'+
+          (overlap?' Två figurer kan hamna på samma plats – då ritas de ovanpå varandra.':''),note:true}
+      ];
+      return {grid:grid,answer:answer,options:built.options,traps:built.traps,
+              lines:lines,fams:['AK'],nrules:2,level:level,struct:'Ackumulation'};
+    }
+    return null;
+  }
+
+  /* ================= motor: roterande mönster ================= */
+  function rot8(m,s){ s=((s%8)+8)%8; return ((m<<s)|(m>>(8-s)))&255; }
+  function removeN(base,n,ccw){
+    var m=base,done=0;
+    for(var i=0;i<8&&done<n;i++){
+      var k=ccw?(7-i):i;
+      if(m&(1<<k)){ m&=~(1<<k); done++; }
+    }
+    return m;
+  }
+  function genNecklace(level){
+    var step=pick([1,-1]),ccw=Math.random()<.5;
+    var variant=pick(['beads','sectors']);
+    var n0=(variant==='sectors')?pick([3,4]):pick([4,5]);
+    for(var t=0;t<400;t++){
+      var base=0,n=0;
+      while(n<n0){ var b=rnd(8); if(!(base&(1<<b))){ base|=(1<<b); n++; } }
+      var grid=[[],[],[]],r,c,ok=true;
+      for(r=0;r<3;r++) for(c=0;c<3;c++){
+        var m=rot8(removeN(base,c,ccw),r*step);
+        if(!m) ok=false;
+        grid[r].push({k:'neck',mask:m,variant:variant});
+      }
+      if(!ok||distinctCount(grid)<9) continue;
+
+      var answer=grid[2][2],key=cellKey(answer),am=answer.mask;
+      var pools={rep:neighbourPool(grid,answer),mx:matrixPool(grid,answer),wp:[],ic:[],md:[]};
+      [1,-1,2].forEach(function(s){
+        var o={k:'neck',mask:rot8(am,s),variant:variant};
+        if(cellKey(o)!==key) pools.wp.push(o);
+      });
+      for(var k2=0;k2<8;k2++){
+        if(am&(1<<k2)){ var o1={k:'neck',mask:am&~(1<<k2),variant:variant}; if(o1.mask) pools.ic.push(o1); }
+        else pools.ic.push({k:'neck',mask:am|(1<<k2),variant:variant});
+      }
+      for(var q=0;q<12;q++){
+        var mm=0,cnt=0;
+        while(cnt<bits(am,8)){ var bb=rnd(8); if(!(mm&(1<<bb))){ mm|=(1<<bb); cnt++; } }
+        if(mm!==am) pools.md.push({k:'neck',mask:mm,variant:variant});
+      }
+      var built=assemble(answer,pools,[['wp',2],['rep',1],['ic',1],['md',1]]);
+      if(!built) continue;
+
+      var enh=(variant==='sectors')?'fyllda sektorer':'fyllda kulor';
+      var lines=[
+        {tag:'PP',text:'Antalet '+enh+' minskar med en för varje ruta åt höger.'},
+        {tag:'RO',text:'Hela mönstret av '+enh+' roterar ett steg '+(step===1?'medurs':'moturs')+' för varje rad nedåt.'},
+        {tag:'—',text:'Vilken som släcks följer mönstrets egen ordning, inte rutans. Rotera först i huvudet, räkna sedan.',note:true}
+      ];
+      return {grid:grid,answer:answer,options:built.options,traps:built.traps,
+              lines:lines,fams:['RO','PP'],nrules:2,level:level,
+              struct:(variant==='sectors')?'Sektorhjul':'Roterande mönster'};
+    }
+    return null;
+  }
+
+  /* ================= motor: visare ================= */
+  function genClock(level){
+    for(var t=0;t<500;t++){
+      var steps=(level>=7)?[1,2,3]:[1,3];
+      var da=pick(steps),db=pick(steps),a0=rnd(4),b0=rnd(4);
+      if(da===2&&db===2) continue;
+      var eq=(level>=6&&Math.random()<.55);
+      var frame=pick(['diamond','square','circle']);
+      var grid=[[],[],[]],r,c;
+      for(r=0;r<3;r++) for(c=0;c<3;c++)
+        grid[r].push({k:'clock',a:(a0+c*da)%4,b:(b0+r*db)%4,eq:eq,frame:frame});
+      if(distinctCount(grid)<(eq?8:9)) continue;
+      var overlaps=0;
+      for(r=0;r<3;r++) for(c=0;c<3;c++) if(grid[r][c].a===grid[r][c].b) overlaps++;
+      if(level>=7&&overlaps<1) continue;
+
+      var answer=grid[2][2];
+      var pools={rep:neighbourPool(grid,answer),mx:matrixPool(grid,answer),wp:[],ic:[],md:[]};
+      pools.wp.push({k:'clock',a:answer.b,b:answer.a,eq:eq,frame:frame});
+      pools.wp.push({k:'clock',a:(answer.a+2)%4,b:(answer.b+2)%4,eq:eq,frame:frame});
+      for(var s=1;s<4;s++){
+        pools.ic.push({k:'clock',a:(answer.a+s)%4,b:answer.b,eq:eq,frame:frame});
+        pools.md.push({k:'clock',a:answer.a,b:(answer.b+s)%4,eq:eq,frame:frame});
+      }
+      var built=assemble(answer,pools,(level>=7)?[['ic',3],['rep',1],['md',1]]:[['wp',1],['rep',1],['ic',2],['md',1]]);
+      if(!built) continue;
+
+      function stepTxt(dd){return dd===1?'90° medurs':(dd===2?'180°':'90° moturs');}
+      var lines;
+      if(eq){
+        lines=[
+          {tag:'VI',text:'Den ena visaren roterar '+stepTxt(da)+' för varje ruta åt höger, den andra '+stepTxt(db)+' för varje rad nedåt.'},
+          {tag:'—',text:'Visarna är lika långa – den enda ledtråden till vilken som är vilken är rotationstakten. Följ en visare i taget: först längs raden, sedan längs kolumnen.',note:true},
+          {tag:'—',text:'När visarna pekar åt samma håll ser rutan ut att bara ha en visare. Räkna aldrig visare.',note:true}
+        ];
+      }else{
+        lines=[
+          {tag:'VI',text:'Den långa visaren roterar '+stepTxt(da)+' för varje ruta åt höger.'},
+          {tag:'VI',text:'Den korta visaren roterar '+stepTxt(db)+' för varje rad nedåt.'},
+          {tag:'—',text:'Vid sammanfall döljs den korta under den långa. Följ varje visare för sig – räkna dem aldrig.',note:true}
+        ];
+      }
+      return {grid:grid,answer:answer,options:built.options,traps:built.traps,
+              lines:lines,fams:['VI'],nrules:2,level:level,struct:'Visare'};
+    }
+    return null;
+  }
+
+  /* ================= förklaringar ================= */
+  function explain(attr,spec){
+    var L=ATTRS[attr].label,idx=spec.idx,ord=ATTRS[attr].ordered;
+    if(spec.nullSlot!==null&&spec.nullSlot!==undefined)
+      return L+' följer fördelning av två: i varje rad och varje kolumn har två rutor var sitt märke och den tredje inget alls. Det som saknas är lika mycket en del av mönstret som det som syns.';
+    if(attr==='fill'){
+      if(idx==='c')    return 'Fyllnaden blir ett steg ljusare för varje ruta åt höger: fylld, skrafferad, tom.';
+      if(idx==='cRev') return 'Fyllnaden blir ett steg mörkare för varje ruta åt höger: tom, skrafferad, fylld.';
+      if(idx==='r')    return 'Fyllnaden är samma i hela raden och blir ett steg ljusare för varje rad nedåt.';
+      if(idx==='rRev') return 'Fyllnaden är samma i hela raden och blir ett steg mörkare för varje rad nedåt.';
+      return 'Fyllnadsgraderna – fylld, skrafferad, tom – förekommer exakt en gång i varje rad och varje kolumn.';
+    }
+    if(attr==='rot'){
+      if(idx==='c')    return 'Pekaren roterar 120° medurs för varje ruta åt höger.';
+      if(idx==='cRev') return 'Pekaren roterar 120° moturs för varje ruta åt höger.';
+      if(idx==='r')    return 'Pekaren är samma i hela raden och roterar 120° medurs nedåt.';
+      if(idx==='rRev') return 'Pekaren är samma i hela raden och roterar 120° moturs nedåt.';
+      return 'Varje pekarriktning förekommer exakt en gång per rad och en gång per kolumn.';
+    }
+    if(attr==='pos'){
+      if(idx==='c')    return 'Figuren flyttar ett steg medurs för varje ruta åt höger.';
+      if(idx==='cRev') return 'Figuren flyttar ett steg moturs för varje ruta åt höger.';
+      if(idx==='r')    return 'Figuren står still i raden och flyttar ett steg medurs för varje rad nedåt.';
+      if(idx==='rRev') return 'Figuren står still i raden och flyttar ett steg moturs för varje rad nedåt.';
+      return 'Varje placering förekommer exakt en gång per rad och en gång per kolumn.';
+    }
+    if(DIST[idx])
+      return L+' förekommer exakt en gång i varje rad och exakt en gång i varje kolumn – ordningen varierar, men alla tre värden finns med.';
+    if(ord){
+      if(idx==='c')    return L+' ökar ett steg för varje ruta åt höger.';
+      if(idx==='cRev') return L+' minskar ett steg för varje ruta åt höger.';
+      if(idx==='r')    return L+' är samma i hela raden och ökar ett steg för varje rad nedåt.';
+      if(idx==='rRev') return L+' är samma i hela raden och minskar ett steg för varje rad nedåt.';
+    }
+    if(idx==='r'||idx==='rRev')
+      return L+' är konstant i raden – alla tre rutorna delar den, och den byts mellan raderna.';
+    return L+' är konstant i kolumnen – samma uppifrån och ner, och byts mellan kolumnerna.';
+  }
+  var TRAPTEXT={
+    'repetition':'Du valde en exakt kopia av rutan bredvid den tomma. Det är den vanligaste feltypen i matristest.',
+    'ofullständig':'Nästan rätt: en regel lämnades oapplicerad. Du hittade mönstret men hann inte kontrollera allt.',
+    'fel princip':'Du applicerade en regel som fanns i matrisen, men i fel riktning eller med fel operation – till exempel att räkna alla prickar som plus, byta plats på elementtyperna eller slå ihop i stället för att ta ut.',
+    'minimal skillnad':'Alternativet skiljer sig från det rätta på exakt en detalj.',
+    'matrisruta':'Du valde en ruta hämtad någon annanstans ifrån i matrisen.',
+    'tappad detalj':'Du missade den detalj som är konstant i alla rutor. Invarianta element ska följa med i svaret.'
+  };
+
+  /* ================= val av motor ================= */
+  function generate(level){
+    var order,i,p;
+    if(level>=7)      order=['neck','clock','sign','quad','freq','overlay','strip','acc'];
+    else if(level>=6) order=['clock','sign','quad','freq','neck','overlay','strip','acc'];
+    else if(level>=5) order=['overlay','sign','quad','freq','strip','acc','clock','transform'];
+    else if(level>=4) order=['acc','sign','freq','strip','transform','transform'];
+    else if(level>=3) order=['strip','transform','transform','transform'];
+    else              order=['transform'];
+    var tries=[pick(order),'transform','overlay','sign','quad','freq','strip','acc','clock','neck'];
+    for(i=0;i<tries.length;i++){
+      var g=tries[i];
+      if(g==='transform') p=genTransform(level);
+      else if(g==='overlay') p=genOverlay(level);
+      else if(g==='sign') p=genSign(level);
+      else if(g==='quad') p=genQuad(level);
+      else if(g==='freq') p=genFreq(level);
+      else if(g==='strip') p=genStrip(level);
+      else if(g==='acc') p=genAccumulate(level);
+      else if(g==='neck') p=genNecklace(level);
+      else p=genClock(level);
+      if(p) return p;
+    }
+    return genTransform(2);
+  }
+
+  /* ================= tillstånd ================= */
+  var TOTAL=20,WARMUP=2;
+  var S={mode:'test',level:4,maxLevel:4,idx:0,correct:0,times:[],levelLog:[],
+         famStat:{},record:[],puzzle:null,answered:false,selected:null,useTimer:true,
+         tid:null,left:120,started:0,paused:false,focusLost:0,reviewing:false,revIdx:0};
+  var LETTERS=['A','B','C','D','E','F'];
+  function $(id){return document.getElementById(id);}
+  function isWarmup(){return S.idx<=WARMUP;}
+
+  function stopTimer(){ if(S.tid){clearInterval(S.tid);S.tid=null;} }
+  function paintTimer(){
+    $('tval').textContent=Math.floor(S.left/60)+':'+String(S.left%60).padStart(2,'0');
+    $('tfill').style.transform='scaleX('+(S.left/120)+')';
+    $('timer').classList.toggle('low',S.left<=30);
+  }
+  function startTimer(){
+    stopTimer(); S.left=120;
+    if(!S.useTimer){ $('timer').style.visibility='hidden'; return; }
+    $('timer').style.visibility='visible'; paintTimer();
+    S.tid=setInterval(function(){
+      if(S.paused) return;
+      S.left--; paintTimer();
+      if(S.left<=0){ stopTimer(); resolve(S.selected,S.selected===null); }
+    },1000);
+  }
+
+  function renderPuzzle(p,revealed,chosen,ci){
+    var g=$('grid'); g.innerHTML='';
+    for(var r=0;r<3;r++) for(var c=0;c<3;c++){
+      var d=document.createElement('div');
+      if(r===2&&c===2&&!revealed){ d.className='cell missing'; d.textContent='?'; }
+      else { d.className='cell'; d.innerHTML=renderCell(r===2&&c===2?p.answer:p.grid[r][c]); }
+      g.appendChild(d);
+    }
+    var o=$('opts'); o.innerHTML='';
+    p.options.forEach(function(a,i){
+      var b=document.createElement('button');
+      b.className='opt'; b.type='button'; b.setAttribute('data-i',i);
+      b.setAttribute('aria-label','Svarsalternativ '+LETTERS[i]);
+      b.innerHTML='<span class="key">'+LETTERS[i]+'</span>'+renderCell(a);
+      if(revealed){
+        b.disabled=true;
+        b.classList.add(i===ci?'correct':(i===chosen?'wrong':'dim'));
+        if(i!==ci&&p.traps&&p.traps[i]){
+          var s=document.createElement('span');
+          s.className='trap'; s.textContent=p.traps[i];
+          b.appendChild(s);
+        }
+      }else{
+        b.addEventListener('click',function(){ selectOption(i); });
+      }
+      o.appendChild(b);
+    });
+  }
+  function selectOption(i){
+    if(S.answered) return;
+    S.selected=i;
+    var btns=document.querySelectorAll('.opt');
+    for(var q=0;q<btns.length;q++) btns[q].classList.toggle('sel',q===i);
+    $('submit').disabled=false;
+  }
+  function showExplanation(p,right,chosen,ci,vt){
+    var v=$('verdict');
+    v.className='verdict '+(right?'ok':'no'); v.textContent=vt;
+    $('famline').textContent=p.struct+' · '+p.nrules+' '+(p.nrules===1?'regel':'regler')+
+      ' · '+p.fams.map(function(f){return FAM[f];}).join(' + ')+' · nivå '+p.level;
+    var ul=$('rules'); ul.innerHTML='';
+    p.lines.forEach(function(l){
+      var li=document.createElement('li');
+      if(l.note) li.className='note';
+      li.innerHTML='<span class="tag">'+l.tag+'</span><span>'+l.text+'</span>';
+      ul.appendChild(li);
+    });
+    var mr=$('misread');
+    if(!right&&chosen!==null&&chosen!==undefined&&p.traps&&TRAPTEXT[p.traps[chosen]]){
+      mr.innerHTML='<b>'+p.traps[chosen]+'</b>'+TRAPTEXT[p.traps[chosen]];
+      mr.hidden=false;
+    } else mr.hidden=true;
+    $('fb').hidden=false;
+  }
+
+  function updateProgress(){
+    if(S.reviewing){ $('progress').textContent='Granskning'; return; }
+    if(isWarmup()) $('progress').innerHTML='<span class="warm">Övning '+S.idx+' / '+WARMUP+'</span>';
+    else $('progress').textContent=(S.idx-WARMUP)+' / '+TOTAL;
+  }
+  function newQuestion(){
+    if(S.idx>=TOTAL+WARMUP){ finish(); return; }
+    S.idx++;
+    S.puzzle=generate(S.level);
+    S.answered=false; S.selected=null; S.started=Date.now();
+    $('lead').textContent=isWarmup()?'Övningsuppgift – räknas inte. Vilken ruta saknas?':'Vilken ruta saknas?';
+    $('fb').hidden=true; $('misread').hidden=true;
+    $('submitrow').style.display='flex'; $('submit').disabled=true;
+    $('pause').style.display='inline-block';
+    renderPuzzle(S.puzzle,false);
+    updateProgress(); startTimer();
+  }
+
+  function resolve(choice,timedOut){
+    if(S.answered) return;
+    S.answered=true; stopTimer();
+    var p=S.puzzle,i,ci=-1;
+    for(i=0;i<p.options.length;i++) if(cellKey(p.options[i])===cellKey(p.answer)) ci=i;
+    var right=(choice!==null&&choice===ci);
+    var scored=!isWarmup();
+
+    if(scored){
+      if(!timedOut&&choice!==null) S.times.push(Math.round((Date.now()-S.started)/1000));
+      if(right) S.correct++;
+      S.levelLog.push(S.level);
+      S.record.push({p:p,chosen:choice,ci:ci,right:right,timedOut:timedOut});
+      p.fams.forEach(function(f){
+        if(!S.famStat[f]) S.famStat[f]={r:0,n:0};
+        S.famStat[f].n++; if(right) S.famStat[f].r++;
+      });
+    }
+    S.level=Math.max(1,Math.min(8,S.level+(right?1:-1)));
+    S.maxLevel=Math.max(S.maxLevel,S.level);
+
+    if(S.mode==='test'&&!isWarmup()){
+      setTimeout(newQuestion,180);
+      return;
+    }
+    renderPuzzle(p,true,choice,ci);
+    var vt=right?'Rätt svar'
+      : timedOut?('Tiden tog slut · rätt var '+LETTERS[ci])
+      : ('Fel · rätt var '+LETTERS[ci]);
+    showExplanation(p,right,choice,ci,vt);
+    $('submitrow').style.display='none';
+    $('pause').style.display='none';
+    $('next').textContent=(S.idx>=TOTAL+WARMUP)?'Se resultatet':'Nästa uppgift';
+    $('fbactions').style.display='flex';
+    $('next').focus();
+  }
+
+  $('submit').addEventListener('click',function(){
+    if(S.selected!==null&&!S.answered) resolve(S.selected,false);
+  });
+  $('pause').addEventListener('click',function(){
+    if(S.answered) return;
+    S.paused=true; $('pauseveil').hidden=false;
+  });
+  $('resume').addEventListener('click',function(){
+    S.paused=false; $('pauseveil').hidden=true;
+  });
+  window.addEventListener('blur',function(){
+    if(S.answered||S.paused||S.reviewing) return;
+    if($('startveil').hidden&&$('endveil').hidden){
+      S.focusLost++;
+      $('focuswarn').textContent='Du lämnade testfönstret – i det skarpa testet loggas detta ('+S.focusLost+')';
+    }
+  });
+  window.addEventListener('focus',function(){
+    setTimeout(function(){ $('focuswarn').textContent=''; },4000);
+  });
+
+  var BANDS=[[2,'Under snittet','percentil 1–6'],[4,'Något under snittet','percentil 7–30'],
+             [6,'Genomsnittligt','percentil 31–69'],[8,'Något över snittet','percentil 70–93'],
+             [10,'Över snittet','percentil 94–99']];
+  function finish(){
+    stopTimer();
+    var log=S.levelLog.slice(-10),theta=1,i;
+    if(log.length){ var s=0; log.forEach(function(l){s+=l;}); theta=s/log.length; }
+    var score=Math.max(1,Math.min(10,Math.round(theta*1.25)));
+    var band=BANDS[BANDS.length-1];
+    for(i=0;i<BANDS.length;i++) if(score<=BANDS[i][0]){ band=BANDS[i]; break; }
+    $('e-score').textContent=score;
+    $('e-band').textContent=band[1];
+    $('e-pct').textContent=band[2];
+    $('e-c').textContent=S.correct;
+    $('e-n').textContent=S.levelLog.length;
+    $('e-l').textContent=S.maxLevel;
+
+    var bars=$('e-bars'); bars.innerHTML='';
+    var order=['KR','PP','F3','F2','AR','FB','KV','ÖL','AK','RO','VI'],weakest=null,weakVal=2;
+    order.forEach(function(f){
+      var st=S.famStat[f]; if(!st||!st.n) return;
+      var pv=st.r/st.n;
+      if(st.n>=2&&pv<weakVal){weakVal=pv;weakest=f;}
+      var li=document.createElement('li');
+      li.innerHTML='<span class="nm">'+FAM[f]+'</span><span class="track"><i style="width:'+
+        Math.round(pv*100)+'%"></i></span><span class="val">'+st.r+'/'+st.n+'</span>';
+      bars.appendChild(li);
+    });
+
+    var pct=S.levelLog.length?Math.round(100*S.correct/S.levelLog.length):0;
+    var note;
+    if(S.levelLog.length<5) note='För kort pass för att säga något. Kör hela omgången på 20 uppgifter.';
+    else if(weakest&&weakVal<.45) note='Din svagaste typ är '+FAM[weakest].toLowerCase()+'. Granska de uppgifterna nedan och kör sedan ett pass i övningsläge.';
+    else if(pct>=75) note='Hög andel rätt betyder att nivån inte hann klättra tillräckligt. Kör ett pass till – det är strukturerna på nivå 6–8 som avgör poängen.';
+    else if(pct>=40) note='Det här ser kalibrerat ut: du löser ungefär hälften och ligger nära din gräns. Precis så ska ett adaptivt test kännas.';
+    else note='Nivån hamnade för högt för snabbt. Kör ett pass i övningsläge och läs regelförklaringarna innan nästa testläge.';
+    $('endnote').textContent=note;
+    $('review').style.display=S.record.length?'block':'none';
+    $('endveil').hidden=false;
+  }
+
+  function showReview(){
+    var rec=S.record[S.revIdx],p=rec.p;
+    $('lead').textContent='Granskning';
+    renderPuzzle(p,true,rec.chosen,rec.ci);
+    var vt=rec.right?'Rätt svar'
+      : rec.timedOut?('Tiden tog slut · rätt var '+LETTERS[rec.ci])
+      : (rec.chosen===null?('Obesvarad · rätt var '+LETTERS[rec.ci]):('Fel · rätt var '+LETTERS[rec.ci]));
+    showExplanation(p,rec.right,rec.chosen,rec.ci,vt);
+    $('pause').style.display='none';
+    $('timer').style.visibility='hidden';
+    $('submitrow').style.display='none';
+    var fa=$('fbactions'); fa.innerHTML='';
+    var nav=document.createElement('div'); nav.className='revnav';
+    nav.innerHTML='<span class="pos">Uppgift '+(S.revIdx+1)+' / '+S.record.length+'</span>'+
+      '<span class="res '+(rec.right?'ok':'no')+'">'+(rec.right?'Rätt':'Fel')+'</span><span class="spacer"></span>';
+    var prev=document.createElement('button'); prev.className='btn ghost'; prev.textContent='Föregående';
+    prev.disabled=(S.revIdx===0);
+    prev.addEventListener('click',function(){ if(S.revIdx>0){S.revIdx--;showReview();} });
+    var nxt=document.createElement('button'); nxt.className='btn';
+    nxt.textContent=(S.revIdx<S.record.length-1)?'Nästa':'Till resultatet';
+    nxt.addEventListener('click',function(){
+      if(S.revIdx<S.record.length-1){S.revIdx++;showReview();}
+      else { S.reviewing=false; $('endveil').hidden=false; }
+    });
+    nav.appendChild(prev); nav.appendChild(nxt);
+    fa.appendChild(nav); fa.style.display='flex';
+    updateProgress();
+  }
+  $('review').addEventListener('click',function(){
+    S.reviewing=true; S.revIdx=0;
+    $('endveil').hidden=true;
+    showReview();
+  });
+
+  function setMode(m){
+    S.mode=m;
+    $('m-test').className='mode'+(m==='test'?' sel':'');
+    $('m-practice').className='mode'+(m==='practice'?' sel':'');
+    $('modemark').textContent=m==='test'?'· testläge':'· övningsläge';
+  }
+  $('m-test').addEventListener('click',function(){setMode('test');});
+  $('m-practice').addEventListener('click',function(){setMode('practice');});
+
+  function begin(){
+    S.useTimer=$('opt-timer').checked;
+    S.level=4; S.maxLevel=4; S.idx=0; S.correct=0;
+    S.times=[]; S.levelLog=[]; S.famStat={}; S.record=[];
+    S.focusLost=0; S.reviewing=false;
+    $('startveil').hidden=true; $('endveil').hidden=true;
+    $('focuswarn').textContent='';
+    newQuestion();
+  }
+  $('begin').addEventListener('click',begin);
+  $('again').addEventListener('click',function(){ $('endveil').hidden=true; $('startveil').hidden=false; });
+  $('next').addEventListener('click',function(){
+    if(S.idx>=TOTAL+WARMUP) finish(); else newQuestion();
+  });
+  $('stop').addEventListener('click',finish);
+
+  document.addEventListener('keydown',function(e){
+    if(!$('startveil').hidden||!$('endveil').hidden||!$('pauseveil').hidden||S.reviewing) return;
+    if(e.key==='Enter'){
+      e.preventDefault();
+      if(!S.answered&&S.selected!==null) $('submit').click();
+      else if(S.answered&&S.mode==='practice') $('next').click();
+      return;
+    }
+    var n=parseInt(e.key,10);
+    if(n>=1&&n<=6&&!S.answered) selectOption(n-1);
+  });
+  updateProgress();
+})();
+</script>
+</body>
+</html>
